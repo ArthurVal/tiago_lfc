@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>tiago_lfc</name>
+  <version>1.0.0</version>
+  <description>TODO.</description>
+  <maintainer email="todo@laas.fr">Noel Jimenez</maintainer>
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>ament_cmake_auto</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <!-- Used by launch - TODO: remove this dependency ? -->
+  <exec_depend>tiago_description</exec_depend>
+
+  <!-- Gazebo stuff -->
+  <exec_depend>gz_ros2_control</exec_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
+
+  <exec_depend>robot_state_publisher</exec_depend>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>launch_param_builder</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
