@@ -13,6 +13,7 @@ from typing import (
     Any,
     List,
     Optional,
+    Text,
     TypeAlias,
     TypeVar,
     Union,
@@ -21,14 +22,16 @@ from typing import (
 from ament_index_python.packages \
     import get_package_share_directory as shared_dir
 
-from launch import LaunchDescription
+from launch import (
+    LaunchContext,
+    LaunchDescription,
+)
 from launch.actions import (
     DeclareLaunchArgument,
     LogInfo,
     OpaqueFunction,
     SetLaunchConfiguration,
 )
-from launch.launch_context import LaunchContext
 from launch.substitutions import (
     # EnvironmentVariable,
     LaunchConfiguration,
@@ -83,7 +86,7 @@ def generate_launch_description():
         __set_config(
             name='robot_description',
             value=__load_xacro(
-                file_path=__from_config('tiago_xacro', convert_to=Path),
+                file_path=__get_config('tiago_xacro', convert=Path),
                 mappings=__dict_from_configs(
                     names=[arg.name for arg in tiago_xacro_mappings_args]
                 )
@@ -141,45 +144,42 @@ def generate_launch_description():
 
 
 T = TypeVar('T')
-LaunchWrapper: TypeAlias = Callable[[LaunchContext], T]
-LaunchWrapperOr: TypeAlias = Union[LaunchWrapper[T], T]
+Wrapper: TypeAlias = Callable[[LaunchContext], T]
+WrapperOr: TypeAlias = Union[Wrapper[T], T]
 
 
-def __eval[T](
-        obj: LaunchWrapperOr[T],
+def __eval(
+        obj: WrapperOr[T],
         context: LaunchContext
 ) -> T:
+    """Return obj(context) when obj is callable, otherwise forward obj."""
     return obj(context) if callable(obj) else obj
 
 
-def __from_config[T](
-        name: str,
-        convert_to: Optional[Callable[[str], T]] = None
-) -> LaunchWrapper[Union[str, T]]:
-    def __wrapper(context: LaunchContext) -> Union[str, T]:
-        value = LaunchConfiguration(name).perform(context)
-        return value if convert_to is None else convert_to(value)
+def __get_config(
+        name: Text,
+        convert: Callable[[Text], T] = lambda x: x
+) -> Wrapper[Union[Text, T]]:
+    def __wrapper(context: LaunchContext) -> Union[Text, T]:
+        return convert(LaunchConfiguration(name).perform(context))
 
     return __wrapper
 
 
 def __set_config(
-        name: str,
-        value: LaunchWrapperOr[str]
-) -> LaunchWrapper[SetLaunchConfiguration]:
+        name: Text,
+        value: WrapperOr[Text]
+) -> Wrapper[SetLaunchConfiguration]:
     def __wrapper(context: LaunchContext) -> SetLaunchConfiguration:
-        return SetLaunchConfiguration(
-            name=name,
-            value=__eval(value, context)
-        )
+        return SetLaunchConfiguration(name, __eval(value, context))
 
     return __wrapper
 
 
 def __dict_from_configs(
-        names: List[str]
-) -> LaunchWrapper[Mapping[str, str]]:
-    def __wrapper(context: LaunchContext) -> Mapping[str, str]:
+        names: List[Text]
+) -> Wrapper[Mapping[Text, Text]]:
+    def __wrapper(context: LaunchContext) -> Mapping[Text, Text]:
         return {
             name: LaunchConfiguration(name).perform(context)
             for name in names
@@ -189,10 +189,10 @@ def __dict_from_configs(
 
 
 def __load_xacro(
-        file_path: LaunchWrapperOr[Path],
-        mappings: Optional[LaunchWrapperOr[Mapping[str, str]]] = None
-) -> LaunchWrapper[str]:
-    def __wrapper(context: LaunchContext) -> str:
+        file_path: WrapperOr[Path],
+        mappings: Optional[WrapperOr[Mapping[Text, Text]]] = None
+) -> Wrapper[Text]:
+    def __wrapper(context: LaunchContext) -> Text:
         return load_xacro(
             file_path=__eval(file_path, context),
             mappings=__eval(mappings, context),
@@ -202,7 +202,7 @@ def __load_xacro(
 
 
 def __make_opaque_function_that(
-        *wrappers: List[LaunchWrapper[Any]]
+        *wrappers: List[Wrapper[Any]]
 ) -> OpaqueFunction:
     def __wrapper(context: LaunchContext()):
         return [__eval(wrapper, context) for wrapper in wrappers]
