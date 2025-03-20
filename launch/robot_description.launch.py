@@ -14,12 +14,7 @@ from launch import (
 )
 from launch.actions import (
     DeclareLaunchArgument,
-    LogInfo,
     SetLaunchConfiguration,
-)
-from launch.substitutions import (
-    # EnvironmentVariable,
-    LaunchConfiguration,
 )
 
 from launch_param_builder import (
@@ -27,8 +22,10 @@ from launch_param_builder import (
 )
 
 from tiago_lfc.opaque_function import (
+    do_format,
     from_xacro,
     get_configs,
+    log,
     make_opaque_function_that,
     set_config,
 )
@@ -65,23 +62,40 @@ def generate_launch_description():
         str(tiago_xacro_mappings),
     )
 
-    log_tiago_xacro = LogInfo(
-        msg=[
-            'Tiago model used:',
-            '\n - Model   : ', LaunchConfiguration('tiago_xacro'),
-            '\n - Mappings: ', LaunchConfiguration('tiago_xacro_mappings'),
-        ]
+    tiago_xacro_mappings_values = get_configs(
+        [arg.name for arg in tiago_xacro_mappings_args],
+        as_dict=True,
+    )
+
+    log_args = make_opaque_function_that(
+        log(
+            msg=do_format(
+                (
+                    'Tiago model file used:'
+                    '\n - Xacro   : {}'
+                    '\n - Mappings: {}'
+                ),
+                get_configs(set_tiago_xacro.name),
+                get_configs(set_tiago_xacro_mappings.name),
+            ),
+        ),
+        log(
+            msg=do_format(
+                (
+                    'Mappings values:'
+                    '\n {}'
+                ),
+                tiago_xacro_mappings_values
+            )
+        ),
     )
 
     set_robot_description = make_opaque_function_that(
         set_config(
             name='robot_description',
             value=from_xacro(
-                file_path=get_configs('tiago_xacro', transform=Path),
-                mappings=get_configs(
-                    *[arg.name for arg in tiago_xacro_mappings_args],
-                    as_dict=True,
-                )
+                file_path=get_configs(set_tiago_xacro.name, transform=Path),
+                mappings=tiago_xacro_mappings_values
             ),
         ),
     )
@@ -93,7 +107,7 @@ def generate_launch_description():
             force_use_sim_time,
             set_tiago_xacro,
             set_tiago_xacro_mappings,
-            log_tiago_xacro,
+            log_args,
             set_robot_description,
         ]
     )

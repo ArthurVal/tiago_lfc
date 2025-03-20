@@ -29,18 +29,17 @@ from .context_value import (
 )
 
 
+def __do_nothing(x: Text) -> Text:
+    return x
+
+
 def get_configs(
-        *names: Iterable[Text],
-        transform: Callable[[Text], T] = lambda x: x,
+        names: Iterable[Text],
+        *,
+        transform: Callable[[Text], T] = __do_nothing,
         as_dict: bool = False,
-) -> ContextValue[
-    Union[
-        T,                 # len(names) == 1
-        Generator[T],      # len(names) > 1 and as_dict = false
-        Mapping[Text, T],  # len(names) > 1 and as_dict = true
-    ]
-]:
-    """Output LaunchConfiguration(name)'s values.
+) -> ContextValue[Union[T, Generator[T], Mapping[Text, T]]]:
+    """Retreive a LaunchConfiguration(name)'s value(s).
 
     Parameters
     ----------
