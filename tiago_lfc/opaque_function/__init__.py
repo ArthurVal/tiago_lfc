@@ -3,6 +3,7 @@
 """opaque_function module providing tools to generate ROS2 OpaqueFunctions."""
 
 from .algorithms import (
+    apply,
     duplicate,
     for_each,
     reduce,

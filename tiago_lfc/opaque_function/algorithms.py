@@ -5,9 +5,11 @@ from collections.abc import (
     Callable,
     Generator,
     Iterable,
+    Mapping,
 )
 from typing import (
-    Any
+    Any,
+    Text,
 )
 
 from .context_value import (
@@ -65,6 +67,33 @@ def for_each(
     def impl(context: LaunchContext) -> None:
         [f(v) for v in from_context(context, values)]
         return None
+
+    return impl
+
+
+def apply(
+        f: Callable[[Iterable[Any], Mapping[Text, Any]], T],
+        args: ContextValueOr[Iterable[Any]],
+        kwargs: ContextValueOr[Mapping[Text, Any]],
+) -> ContextValue[T]:
+    """Todo.
+
+    Parameters
+    ----------
+    f: Callable[[Iterable[Any], Mapping[Text, Any]], T]
+      Todo.
+    args: ContextValueOr[Iterable[Any]]
+      Context values evaluated from the LaunchContext containing an iterable
+    kwargs: ContextValueOr[Mapping[Text, Any]]
+      Context values evaluated from the LaunchContext containing a Mapping
+
+    Returns
+    -------
+    ContextValue[T]
+      TODO
+    """
+    def impl(context: LaunchContext) -> Generator[Any]:
+        return f(*from_context(context, args), **from_context(context, kwargs))
 
     return impl
 
