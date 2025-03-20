@@ -27,7 +27,8 @@ from .context_value import (
     from_context,
 )
 from .log import (
-    log
+    do_format,
+    log,
 )
 from .make_opaque_function_that import (
     make_opaque_function_that,
@@ -65,6 +66,7 @@ __all__ = [
     'set_config',
 
     # log
+    'do_format',
     'log',
 
     # urdf

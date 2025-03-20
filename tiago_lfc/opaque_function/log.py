@@ -27,27 +27,52 @@ from .context_value import (
 )
 
 
-def log(
+def do_format(
         fmt: Text,
         *args: Iterable[ContextValueOr[Any]],
-        logger: Logger = get_logger('launch.user'),
-        level: int = INFO,
         **kwargs: Mapping[Text, ContextValueOr[Any]],
-) -> ContextValue[None]:
+) -> ContextValue[Text]:
     """Log.
 
     Parameters
     ----------
     fmt: Text
-      TODO
+      Fmt string used by the log
     *args: Iterable[ContextValueOr[Any]]
-      TODO
-    logger: logging.Logger
-      TODO
-    level: int
-      TODO
+      List of ContextValueOr forwarded to the .format() function
     **kwargs: Mapping[Text, ContextValueOr[Any]]
-      TODO
+      Map of Keys/ContextValueOr forwarded to the .format() function
+
+    Returns
+    -------
+    ContextValue[Text]
+      A ContextValue calling fmt.format()
+    """
+    def impl(context: LaunchContext) -> Text:
+        return fmt.format(
+            *[from_context(context, arg) for arg in args],
+            **{k: from_context(context, v) for k, v in kwargs.items()},
+        )
+
+    return impl
+
+
+def log(
+        msg: ContextValueOr[Text],
+        *,
+        level: ContextValueOr[int] = INFO,
+        logger: Logger = get_logger('launch.user'),
+) -> ContextValue[None]:
+    """Log.
+
+    Parameters
+    ----------
+    msg: ContextValueOr[Text]
+      Msg to log
+    level: int
+      Log level used
+    logger: logging.Logger
+      logging.Logger used to log to
 
     Returns
     -------
@@ -56,10 +81,7 @@ def log(
     """
     def impl(context: LaunchContext) -> None:
         logger.log(
-            level=level,
-            msg=fmt.format(
-                *[from_context(context, v) for v in args],
-                **{k: from_context(context, v) for k, v in kwargs.items()}
-            )
+            level=from_context(context, level),
+            msg=from_context(context, msg)
         )
     return impl
