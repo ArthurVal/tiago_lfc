@@ -15,7 +15,6 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 
 from tiago_lfc.opaque_function import (
-    apply,
     do_format,
     get_configs,
     log,
