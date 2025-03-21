@@ -32,7 +32,7 @@ def do_format(
         *args: Iterable[ContextValueOr[Any]],
         **kwargs: Mapping[Text, ContextValueOr[Any]],
 ) -> ContextValue[Text]:
-    """Log.
+    """Call fmt.format(*args, **kwargs) after evaluating args/kwargs.
 
     Parameters
     ----------
