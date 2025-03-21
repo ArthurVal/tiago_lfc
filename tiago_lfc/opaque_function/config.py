@@ -34,7 +34,7 @@ def __do_nothing(x: Text) -> Text:
 
 
 def get_configs(
-        names: Iterable[Text],
+        names: Union[Text, Iterable[Text]],
         *,
         transform: Callable[[Text], T] = __do_nothing,
         as_dict: bool = False,
@@ -43,7 +43,7 @@ def get_configs(
 
     Parameters
     ----------
-    names: Iterable[Text]
+    names: Union[Text, Iterable[Text]]
       The launch configuration's names
     transform: Callable[[Text], T] (default: lambda x: x)
       A Callable that transform the launch configuration's value before storing
@@ -55,17 +55,17 @@ def get_configs(
     -------
     ContextValue[..]
       A ContextValue that create either:
-        - T the transformed launch config's value when only 1 name is given;
+        - T the transformed launch config's value only when names is a Text
         - Mapping[Text, T] when as_dict is true
         - Generator[T] otherwise
     """
     def impl(context: LaunchContext) -> Union[
-            T,                 # len(names) == 1
+            T,                 # names is Text
             Generator[T],      # len(names) > 1 and as_dict = 0
             Mapping[Text, T],  # len(names) > 1 and as_dict = 1
     ]:
-        if len(names) == 1:
-            return transform(LaunchConfiguration(names[0]).perform(context))
+        if isinstance(names, str):
+            return transform(LaunchConfiguration(names).perform(context))
         else:
             if as_dict:
                 return {
