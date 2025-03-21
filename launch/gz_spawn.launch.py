@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-"""TODO.
+"""TODO."""
 
-Description.
-"""
 from ament_index_python.packages \
     import get_package_share_directory as shared_dir
 
@@ -22,6 +20,8 @@ from launch.substitutions import (
 
 def generate_launch_description():
     """Spawn tiago inside an already running GZ's world."""
+    
+    
     return LaunchDescription(
         [
             # TODO
