@@ -52,8 +52,6 @@ def generate_launch_description():
         for name, params in load_yaml(tiago_xacro_mappings).items()
     ]
 
-    force_use_sim_time = SetLaunchConfiguration('use_sim_time', 'True')
-
     set_tiago_xacro = SetLaunchConfiguration(
         'tiago_xacro',
         str(tiago_xacro),
@@ -102,7 +100,6 @@ def generate_launch_description():
         tiago_xacro_mappings_args +
         [
             # Config updates
-            force_use_sim_time,
             set_tiago_xacro,
             set_tiago_xacro_mappings,
             log_args,
