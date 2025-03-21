@@ -48,7 +48,7 @@ def make_arguments_from_yaml(
     logger.debug('Adding new launch arguments from yaml:')
     logger.debug('{path}'.format(path=file_path))
     for name, params in load_yaml(file_path).items():
-        logger.info('- {name}'.format(name=name))
+        logger.debug('- {name}'.format(name=name))
         arg_names.append(name)
         description.add_action(
             DeclareLaunchArgument(name, **params)
