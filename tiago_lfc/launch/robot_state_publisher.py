@@ -2,6 +2,10 @@
 
 """TODO."""
 
+from typing import (
+    Text,
+)
+
 from launch import (
     LaunchDescription,
 )
@@ -25,13 +29,25 @@ from . import (
     logger,
 )
 
+
 def make_robot_state_publisher(
+        *,
         description: LaunchDescription = LaunchDescription(),
+        robot_description_config_name: Text = 'robot_description',
 ) -> LaunchDescription:
-    """Spawn a robot_state_publisher, using robot_description provided."""
+    """Spawn a robot_state_publisher, using robot_description config."""
+    description.add_action(
+        DeclareLaunchArgument(
+            robot_description_config_name,
+            description='Robot description used by the robot_state_publisher',
+            default_value='',
+        )
+    )
+
     description.add_action(
         DeclareLaunchArgument(
             'namespace',
+            description='Namespace used to populate nodes',
             default_value='',
         )
     )
@@ -52,7 +68,7 @@ def make_robot_state_publisher(
             parameters=[
                 {
                     'robot_description': LaunchConfiguration(
-                        'robot_description'
+                        robot_description_config_name
                     ),
                     'use_sim_time': LaunchConfiguration(
                         'use_sim_time'
@@ -68,9 +84,11 @@ def make_robot_state_publisher(
                 msg=do_format(
                     (
                         'robot_state_publisher spawned with:'
+                        '\n - robot_description_config_name: "{name}"'
                         '\n - namespace: "{ns}"'
                         '\n - use_sim_time: {sim_time}'
                     ),
+                    name=robot_description_config_name,
                     ns=get_configs('namespace'),
                     sim_time=get_configs('use_sim_time'),
                 ),
