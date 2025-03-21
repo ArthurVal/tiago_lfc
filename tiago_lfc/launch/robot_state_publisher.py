@@ -96,6 +96,4 @@ def make_robot_state_publisher(
             )
         )
     )
-
-    logger.info('- robot_state_publisher: DONE')
     return description
