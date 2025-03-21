@@ -2,28 +2,24 @@
 
 """TODO."""
 
-from ament_index_python.packages \
-    import get_package_share_directory as shared_dir
+from tiago_lfc.launch import (
+    make_gz_server,
+    make_gz_spawn,
+    make_robot_description_from_tiago_description,
+    make_robot_state_publisher,
+)
 
-from launch import (
-    LaunchContext,
-    LaunchDescription,
-)
-from launch.actions import (
-    DeclareLaunchArgument,
-    SetLaunchConfiguration,
-)
-from launch.substitutions import (
-    # EnvironmentVariable,
-    LaunchConfiguration,
-)
 
 def generate_launch_description():
-    """Spawn tiago inside an already running GZ's world."""
-    
-    
-    return LaunchDescription(
-        [
-            # TODO
-        ]
+    """Spawn a robot_state_publisher, using robot_description provided."""
+    d = make_gz_server()
+
+    d = make_robot_description_from_tiago_description(
+        description=d
     )
+
+    d = make_robot_state_publisher(
+        description=d
+    )
+
+    return make_gz_spawn(description=d)
