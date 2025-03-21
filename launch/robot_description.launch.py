@@ -23,13 +23,13 @@ from launch_param_builder import (
 )
 
 from tiago_lfc.opaque_function import (
+    apply,
     do_format,
     from_xacro,
     get_configs,
     log,
     make_opaque_function_that,
     set_config,
-    apply,
 )
 
 
