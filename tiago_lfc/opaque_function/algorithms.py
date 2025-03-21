@@ -73,27 +73,30 @@ def for_each(
 
 def apply(
         f: Callable[[Iterable[Any], Mapping[Text, Any]], T],
-        args: ContextValueOr[Iterable[Any]],
-        kwargs: ContextValueOr[Mapping[Text, Any]],
+        *args: Iterable[ContextValueOr[Any]],
+        **kwargs: Mapping[Text, ContextValueOr[Any]],
 ) -> ContextValue[T]:
-    """Todo.
+    """Call the function f with *args and **kwargs after evaluation.
 
     Parameters
     ----------
     f: Callable[[Iterable[Any], Mapping[Text, Any]], T]
-      Todo.
+      Any callable responsible for transforming the evaluated values.
     args: ContextValueOr[Iterable[Any]]
-      Context values evaluated from the LaunchContext containing an iterable
+      C-values evaluated and then forward to f
     kwargs: ContextValueOr[Mapping[Text, Any]]
-      Context values evaluated from the LaunchContext containing a Mapping
+      Mapping of key/c-values evaluated and then forward to f
 
     Returns
     -------
     ContextValue[T]
-      TODO
+      A callable returning the result of calling call f
     """
     def impl(context: LaunchContext) -> Generator[Any]:
-        return f(*from_context(context, args), **from_context(context, kwargs))
+        return f(
+            *[from_context(context, arg) for arg in args],
+            **{k: from_context(context, v) for k, v in kwargs.items()}
+        )
 
     return impl
 
