@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-"""TODO.
+"""TODO."""
 
-Description.
-"""
 import os
 
 from ament_index_python.packages \

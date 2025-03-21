@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-"""TODO.
+"""TODO."""
 
-Description.
-"""
 from pathlib import Path
+from pprint import (
+    pformat,
+)
 
 from ament_index_python.packages \
     import get_package_share_directory as shared_dir
@@ -28,6 +29,7 @@ from tiago_lfc.opaque_function import (
     log,
     make_opaque_function_that,
     set_config,
+    apply,
 )
 
 
@@ -71,21 +73,17 @@ def generate_launch_description():
         log(
             msg=do_format(
                 (
-                    'Tiago model file used:'
-                    '\n - Xacro   : {}'
-                    '\n - Mappings: {}'
+                    '\nUsing xacro model from:'
+                    '\n{xacro}'
+                    '\nMappings:'
+                    '\n- Exported from:'
+                    '\n{xacro_config}'
+                    '\n- Values (can be updated with <name>:=<value>):'
+                    '\n{xacro_mappings}'
                 ),
-                get_configs(set_tiago_xacro.name),
-                get_configs(set_tiago_xacro_mappings.name),
-            ),
-        ),
-        log(
-            msg=do_format(
-                (
-                    'Mappings values:'
-                    '\n {}'
-                ),
-                tiago_xacro_mappings_values
+                xacro=get_configs(set_tiago_xacro.name),
+                xacro_config=get_configs(set_tiago_xacro_mappings.name),
+                xacro_mappings=apply(pformat, tiago_xacro_mappings_values)
             )
         ),
     )
