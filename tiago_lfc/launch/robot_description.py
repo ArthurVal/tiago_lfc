@@ -31,7 +31,6 @@ from tiago_lfc.opaque_function import (
 
 from . import (
     logger,
-    make_arguments_from_yaml,
 )
 
 
@@ -67,6 +66,7 @@ def make_robot_description_from_xacro(
             names=mappings_config_names
         )
     )
+
     all_mappings_args_value = get_configs(mappings_config_names, as_dict=True)
     description.add_action(
         make_opaque_function_that(
@@ -89,44 +89,4 @@ def make_robot_description_from_xacro(
             ),
         )
     )
-    return description
-
-
-def make_robot_description_from_tiago_description(
-        *,
-        description: LaunchDescription = LaunchDescription(),
-) -> LaunchDescription:
-    """Create a Description with robot_description from 'tiago_description'.
-
-    Parameters
-    ----------
-    description: LaunchDescription
-      If defined, use this description instead of creating a new one
-
-    Returns
-    -------
-    LaunchDescription
-      The launch description populated with robot_description
-    """
-    from ament_index_python.packages import get_package_share_directory
-
-    description, args_names = make_arguments_from_yaml(
-        file_path=Path(
-            get_package_share_directory('tiago_description'),
-            'config',
-            'tiago_configuration.yaml',
-        ),
-        description=description,
-    )
-
-    description = make_robot_description_from_xacro(
-        file_path=Path(
-            get_package_share_directory('tiago_description'),
-            'robots',
-            'tiago.urdf.xacro',
-        ),
-        mappings_config_names=args_names,
-        description=description,
-    )
-
     return description

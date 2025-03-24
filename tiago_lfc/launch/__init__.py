@@ -9,7 +9,6 @@ from .arguments import (
     make_arguments_from_yaml,
 )
 from .robot_description import (
-    make_robot_description_from_tiago_description,
     make_robot_description_from_xacro,
 )
 from .robot_state_publisher import (
@@ -26,7 +25,6 @@ __all__ = [
     'make_arguments_from_yaml',
 
     # robot_description
-    'make_robot_description_from_tiago_description',
     'make_robot_description_from_xacro',
 
     # robot_state_publisher

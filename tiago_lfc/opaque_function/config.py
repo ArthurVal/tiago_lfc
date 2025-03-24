@@ -17,6 +17,7 @@ from launch.actions import (
     SetLaunchConfiguration,
 )
 from launch.substitutions import (
+    EnvironmentVariable,
     LaunchConfiguration,
 )
 
@@ -104,5 +105,53 @@ def set_config(
             name,
             from_context(context, value)
         )
+
+    return impl
+
+
+def get_envs(
+        names: Union[Text, Iterable[Text]],
+        *,
+        transform: Callable[[Text], T] = __do_nothing,
+        as_dict: bool = False,
+) -> ContextValue[Union[T, Generator[T], Mapping[Text, T]]]:
+    """Retreive a EnvironmentVariable(name)'s value(s).
+
+    Parameters
+    ----------
+    names: Union[Text, Iterable[Text]]
+      The env variable names
+    transform: Callable[[Text], T] (default: lambda x: x)
+      A Callable that transform the env text value before storing
+      it inside the container (default to identity).
+    as_dict: bool (default: False)
+      Set to True if you wish to output a Mapping[Text, T]
+
+    Returns
+    -------
+    ContextValue[..]
+      A ContextValue that create either:
+        - T the transformed env variable's value only when names is a Text
+        - Mapping[Text, T] when as_dict is true
+        - Generator[T] otherwise
+    """
+    def impl(context: LaunchContext) -> Union[
+            T,                 # names is Text
+            Generator[T],      # len(names) > 1 and as_dict = 0
+            Mapping[Text, T],  # len(names) > 1 and as_dict = 1
+    ]:
+        if isinstance(names, str):
+            return transform(EnvironmentVariable(names).perform(context))
+        else:
+            if as_dict:
+                return {
+                    name: transform(EnvironmentVariable(name).perform(context))
+                    for name in names
+                }
+            else:
+                return (
+                    transform(EnvironmentVariable(name).perform(context))
+                    for name in names
+                )
 
     return impl

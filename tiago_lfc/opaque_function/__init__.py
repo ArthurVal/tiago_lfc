@@ -18,6 +18,7 @@ from .compare import (
     not_equals,
 )
 from .config import (
+    get_envs,
     get_configs,
     set_config,
 )
@@ -63,6 +64,7 @@ __all__ = [
     'not_equals',
 
     # config
+    'get_envs',
     'get_configs',
     'set_config',
 
