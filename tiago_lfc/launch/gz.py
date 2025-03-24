@@ -3,10 +3,16 @@
 """TODO."""
 
 import logging
+
+from pathlib import (
+    Path,
+)
 from pprint import (
     pformat,
 )
-
+from typing import (
+    Optional,
+)
 
 from launch import (
     LaunchDescription,
@@ -143,14 +149,21 @@ def make_gz_server(
 def make_gz_spawn(
         *,
         description: LaunchDescription = LaunchDescription(),
+        model_path: Optional[Path] = None,
 ) -> LaunchDescription:
     """TODO."""
-    description.add_action(
-        DeclareLaunchArgument(
-            'model',
-            description='Path of the entity model file we wish to spawn',
+    if model_path is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'model',
+                description='Path of the entity model file we wish to spawn',
+                # default_value=LaunchConfiguration('model'),
+            )
         )
-    )
+    else:
+        description.add_action(
+            SetLaunchConfiguration('model', str(model_path))
+        )
 
     description.add_action(
         DeclareLaunchArgument(

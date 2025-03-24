@@ -12,6 +12,7 @@ from pprint import (
     pformat,
 )
 from typing import (
+    Optional,
     Text,
 )
 
@@ -34,14 +35,20 @@ from . import (
 )
 
 
+def __write_to_file(file_path: Path, txt: Text) -> None:
+    with open(file_path, 'w') as f:
+        f.write(txt)
+
+
 def make_robot_description_from_xacro(
         file_path: Path,
         mappings_config_names: Iterable[Text],
         *,
         description: LaunchDescription = LaunchDescription(),
-        name: Text = 'robot_description',
+        config_name: Text = 'robot_description',
+        output_file: Optional[Path] = None,
 ) -> LaunchDescription:
-    """Create a Description with the robot_description set from a xacro.
+    """Create a Configuration with the robot_description from a xacro.
 
     Parameters
     ----------
@@ -51,8 +58,10 @@ def make_robot_description_from_xacro(
       List of launch configuration names defining all xacro mappings used
     description: LaunchDescription
       If defined, use this description instead of creating a new one
-    name: Text
+    config_name: Text
       The robot_description name used when setting the launch config
+    output_file: Optional[Path]
+      If given, will write the content of robot_description to the given file
 
     Returns
     -------
@@ -81,7 +90,7 @@ def make_robot_description_from_xacro(
                 logger=logger,
             ),
             set_config(
-                name=name,
+                name=config_name,
                 value=from_xacro(
                     file_path=file_path,
                     mappings=all_mappings_args_value
@@ -89,4 +98,20 @@ def make_robot_description_from_xacro(
             ),
         )
     )
+
+    if output_file is not None:
+        description.add_action(
+            make_opaque_function_that(
+                log(
+                    f'Dumping {config_name} to file {output_file}',
+                    logger=logger,
+                ),
+                apply(
+                    __write_to_file,
+                    file_path=output_file,
+                    txt=get_configs(config_name),
+                )
+            )
+        )
+
     return description
