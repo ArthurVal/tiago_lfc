@@ -155,14 +155,14 @@ def make_gz_spawn(
     if model_path is None:
         description.add_action(
             DeclareLaunchArgument(
-                'model',
+                'model_path',
                 description='Path of the entity model file we wish to spawn',
-                # default_value=LaunchConfiguration('model'),
+                # default_value=LaunchConfiguration('model_path'),
             )
         )
     else:
         description.add_action(
-            SetLaunchConfiguration('model', str(model_path))
+            SetLaunchConfiguration('model_path', str(model_path))
         )
 
     description.add_action(
@@ -202,7 +202,7 @@ def make_gz_spawn(
                 name='service_request',
                 value=do_format(
                     'sdf_filename: "{file_name}", name: "{entity_name}"',
-                    file_name=get_configs('model'),
+                    file_name=get_configs('model_path'),
                     entity_name=get_configs('entity_name'),
                 )
             ),
