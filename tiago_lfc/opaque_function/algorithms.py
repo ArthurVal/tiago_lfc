@@ -5,11 +5,9 @@ from collections.abc import (
     Callable,
     Generator,
     Iterable,
-    Mapping,
 )
 from typing import (
     Any,
-    Text,
 )
 
 from .context_value import (

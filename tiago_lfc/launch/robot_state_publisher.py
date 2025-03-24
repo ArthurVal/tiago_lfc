@@ -2,11 +2,6 @@
 
 """TODO."""
 
-from typing import (
-    Optional,
-    Text,
-)
-
 from launch import (
     LaunchDescription,
 )

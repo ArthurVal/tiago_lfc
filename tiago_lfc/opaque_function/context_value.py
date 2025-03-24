@@ -23,7 +23,13 @@ from launch import (
 
 T = TypeVar('T')
 
+# Value that is meant to be evaluated later on, given a LaunchContext.
+# It is the main return type of all function in the opaque_function module that
+# is meant to be plugged into each other.
 ContextValue: TypeAlias = Callable[[LaunchContext], T]
+
+# Argument type of function from the opaque_function module that wish to be
+# plugged to other opaque_function outputs.
 ContextValueOr: TypeAlias = Union[ContextValue[T], T]
 
 
@@ -47,7 +53,7 @@ def apply(
         *args: Iterable[ContextValueOr[Any]],
         **kwargs: Mapping[Text, ContextValueOr[Any]],
 ) -> ContextValue[T]:
-    """Call the function f with *args and **kwargs after evaluation.
+    """Call the function f with args and kwargs after evaluation.
 
     This should be used to call traditional functions on unevaluated arguments
     coming from the LaunchConfiguration context.
