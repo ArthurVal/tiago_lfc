@@ -45,7 +45,6 @@ def make_robot_description_from_xacro(
         mappings_config_names: Iterable[Text],
         *,
         description: LaunchDescription = LaunchDescription(),
-        config_name: Text = 'robot_description',
         output_file: Optional[Path] = None,
 ) -> LaunchDescription:
     """Create a Configuration with the robot_description from a xacro.
@@ -58,8 +57,6 @@ def make_robot_description_from_xacro(
       List of launch configuration names defining all xacro mappings used
     description: LaunchDescription
       If defined, use this description instead of creating a new one
-    config_name: Text
-      The robot_description name used when setting the launch config
     output_file: Optional[Path]
       If given, will write the content of robot_description to the given file
 
@@ -69,11 +66,9 @@ def make_robot_description_from_xacro(
       The launch description populated with robot_description
     """
     logger.debug('Will populate "robot_description" from [XACRO]')
-    logger.debug('{file_path}'.format(file_path=file_path))
+    logger.debug(f'{file_path}')
     logger.debug(
-        'Using mappings from launch configuration:\n{names}'.format(
-            names=mappings_config_names
-        )
+        f'Using mappings from launch configuration:\n{mappings_config_names}'
     )
 
     all_mappings_args_value = get_configs(mappings_config_names, as_dict=True)
@@ -90,7 +85,7 @@ def make_robot_description_from_xacro(
                 logger=logger,
             ),
             set_config(
-                name=config_name,
+                name='robot_description',
                 value=from_xacro(
                     file_path=file_path,
                     mappings=all_mappings_args_value
@@ -103,13 +98,13 @@ def make_robot_description_from_xacro(
         description.add_action(
             make_opaque_function_that(
                 log(
-                    f'Dumping {config_name} to file {output_file}',
+                    f'Dumping robot_description to {output_file}',
                     logger=logger,
                 ),
                 apply(
                     __write_to_file,
                     file_path=output_file,
-                    txt=get_configs(config_name),
+                    txt=get_configs('robot_description'),
                 )
             )
         )
