@@ -22,8 +22,7 @@ from launch.logging import (
 from .context_value import (
     ContextValue,
     ContextValueOr,
-    LaunchContext,
-    from_context,
+    apply,
 )
 
 
@@ -48,20 +47,15 @@ def do_format(
     ContextValue[Text]
       A ContextValue calling fmt.format()
     """
-    def impl(context: LaunchContext) -> Text:
-        return fmt.format(
-            *[from_context(context, arg) for arg in args],
-            **{k: from_context(context, v) for k, v in kwargs.items()},
-        )
-
-    return impl
+    return apply(str.format, fmt, *args, **kwargs)
 
 
 def log(
         msg: ContextValueOr[Text],
-        *,
+        *args,
         level: ContextValueOr[int] = INFO,
         logger: Logger = get_logger('launch.user'),
+        **kwargs,
 ) -> ContextValue[None]:
     """Log.
 
@@ -79,9 +73,4 @@ def log(
     ContextValue[None]
       A ContextValue simply logging things after context' evaluation
     """
-    def impl(context: LaunchContext) -> None:
-        logger.log(
-            level=from_context(context, level),
-            msg=from_context(context, msg)
-        )
-    return impl
+    return apply(Logger.log, logger, level, msg, *args, **kwargs)

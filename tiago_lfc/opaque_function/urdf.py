@@ -17,8 +17,7 @@ from launch_param_builder import load_xacro
 from .context_value import (
     ContextValue,
     ContextValueOr,
-    LaunchContext,
-    from_context,
+    apply,
 )
 
 
@@ -40,10 +39,4 @@ def from_xacro(
     ContextValue[Text]
       A ContextValue that create an urdf string from the xacro file_path
     """
-    def impl(context: LaunchContext) -> Text:
-        return load_xacro(
-            file_path=from_context(context, file_path),
-            mappings=from_context(context, mappings),
-        )
-
-    return impl
+    return apply(load_xacro, file_path=file_path, mappings=mappings)

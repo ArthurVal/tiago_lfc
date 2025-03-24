@@ -32,7 +32,6 @@ def make_opaque_function_that(
     """Create an OpaqueFunction from the given context's values.
 
     This is the main entry point of the opaque_function_helper module.
-    TODO
 
     Notes
     -----
