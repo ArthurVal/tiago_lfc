@@ -3,6 +3,7 @@
 """TODO."""
 
 from typing import (
+    Optional,
     Text,
 )
 
@@ -33,12 +34,11 @@ from . import (
 def make_robot_state_publisher(
         *,
         description: LaunchDescription = LaunchDescription(),
-        robot_description_config_name: Text = 'robot_description',
 ) -> LaunchDescription:
     """Spawn a robot_state_publisher, using robot_description config."""
     description.add_action(
         DeclareLaunchArgument(
-            robot_description_config_name,
+            'robot_description',
             description='Robot description used by the robot_state_publisher',
             default_value='',
         )
@@ -63,12 +63,12 @@ def make_robot_state_publisher(
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
-            output='both',
+            output='screen',
             namespace=LaunchConfiguration('namespace'),
             parameters=[
                 {
                     'robot_description': LaunchConfiguration(
-                        robot_description_config_name
+                        'robot_description'
                     ),
                     'use_sim_time': LaunchConfiguration(
                         'use_sim_time'
@@ -84,11 +84,9 @@ def make_robot_state_publisher(
                 msg=do_format(
                     (
                         'robot_state_publisher spawned with:'
-                        '\n - robot_description_config_name: "{name}"'
                         '\n - namespace: "{ns}"'
                         '\n - use_sim_time: {sim_time}'
                     ),
-                    name=robot_description_config_name,
                     ns=get_configs('namespace'),
                     sim_time=get_configs('use_sim_time'),
                 ),
