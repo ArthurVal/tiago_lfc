@@ -8,9 +8,6 @@ from collections.abc import (
 from pathlib import (
     Path,
 )
-from pprint import (
-    pformat,
-)
 from typing import (
     Optional,
     Text,
@@ -30,8 +27,11 @@ from tiago_sim.opaque_function import (
     set_config,
 )
 
-from . import (
+from .logging import (
     logger,
+)
+from .utils import (
+    dict_to_string,
 )
 
 
@@ -80,7 +80,11 @@ def make_robot_description_from_xacro(
                         'Xacro Mappings arguments evaluated to:'
                         '\n{mappings}'
                     ),
-                    mappings=apply(pformat, all_mappings_args_value)
+                    mappings=apply(
+                        dict_to_string,
+                        all_mappings_args_value,
+                        kv_header='--> ',
+                    )
                 ),
                 logger=logger,
             ),

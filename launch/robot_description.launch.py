@@ -9,14 +9,14 @@ from pathlib import (
 from ament_index_python.packages import get_package_share_directory
 
 from tiago_sim.launch import (
-    make_arguments_from_yaml,
+    declare_arguments_from_yaml,
     make_robot_description_from_xacro,
 )
 
 
 def generate_launch_description():
     """Add the robot_description launch configuration using tiago's xacro."""
-    description, args_names = make_arguments_from_yaml(
+    description, args_names = declare_arguments_from_yaml(
         file_path=Path(
             get_package_share_directory('tiago_description'),
             'config',

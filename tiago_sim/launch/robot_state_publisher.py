@@ -21,7 +21,7 @@ from tiago_sim.opaque_function import (
     make_opaque_function_that,
 )
 
-from . import (
+from .logging import (
     logger,
 )
 

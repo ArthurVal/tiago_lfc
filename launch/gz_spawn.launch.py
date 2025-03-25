@@ -3,10 +3,10 @@
 """ROS2 launch file that spawn a GZ entity into an already running GZ world."""
 
 from tiago_sim.launch import (
-    make_gz_spawn,
+    gz_spawn_entity,
 )
 
 
 def generate_launch_description():
     """TODO."""
-    return make_gz_spawn()
+    return gz_spawn_entity()

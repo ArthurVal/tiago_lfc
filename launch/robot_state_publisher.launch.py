@@ -9,7 +9,7 @@ from pathlib import (
 from ament_index_python.packages import get_package_share_directory
 
 from tiago_sim.launch import (
-    make_arguments_from_yaml,
+    declare_arguments_from_yaml,
     make_robot_description_from_xacro,
     make_robot_state_publisher,
 )
@@ -20,7 +20,7 @@ def generate_launch_description():
     # NOTE: We don't use Include... from launch stuff because otherwise
     # arguments coming from included launch file don't appear when doing
     # `ros2 launch <pkg> <launch> -s`
-    description, args_names = make_arguments_from_yaml(
+    description, args_names = declare_arguments_from_yaml(
         file_path=Path(
             get_package_share_directory('tiago_description'),
             'config',

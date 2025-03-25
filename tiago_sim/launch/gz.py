@@ -2,15 +2,18 @@
 
 """Add utils launch function managing GZ stuff."""
 
-import logging
+from logging import (
+    DEBUG,
+)
 from pathlib import (
     Path,
 )
-from pprint import (
-    pformat,
-)
 from typing import (
+    Any,
+    Dict,
     Optional,
+    Text,
+    Union,
 )
 
 from launch import (
@@ -20,7 +23,6 @@ from launch.actions import (
     AppendEnvironmentVariable,
     DeclareLaunchArgument,
     ExecuteProcess,
-    SetLaunchConfiguration,
 )
 from launch.substitutions import (
     LaunchConfiguration,
@@ -36,30 +38,65 @@ from tiago_sim.opaque_function import (
     set_config,
 )
 
-from . import (
+from .logging import (
     logger,
+)
+from .utils import (
+    dict_to_string,
 )
 
 
-def make_gz_server(
+def gz_server(
         *,
+        world: Optional[Path] = None,
+        gui: Optional[bool] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
-    """Create/update a description to launch a gz server in the background."""
-    description.add_action(
-        SetLaunchConfiguration(
-            'use_sim_time',
-            'True',
-        )
-    )
+    """Create/update a description to launch a gz sim server.
 
-    description.add_action(
-        DeclareLaunchArgument(
-            'world_file',
-            description='sdf file of the world we wish to create',
-            default_value='empty.sdf'
+    Parameters
+    ----------
+    world: Optional[Path]
+      If not None, correspond to the sdf file use to spawn the server with.
+      When None, declare a LaunchArgument for it (default to 'empty.sdf').
+    gui: Optional[bool]
+      If not None, indicates if we wish to spawn the UI or only the server in
+      background. When None, declare a LaunchArgument for it (default to True).
+    description: Optional[LaunchDescription]
+      LaunchDescription to use instead of creating a new one
+
+    Returns
+    -------
+    LaunchDescription
+      The launch description with that launch the gz sim server accordingly
+    """
+    if world is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'world',
+                description='sdf file of the world we wish to create',
+                default_value='empty.sdf'
+            )
         )
-    )
+        world = get_configs('world')
+
+    if gui is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'gui',
+                description=(
+                    'Set to false if you wish to disable the GUI and only '
+                    'launch the server in background'
+                ),
+                default_value='True',
+                choices=['False', 'True'],
+            )
+        )
+        gui = get_configs(
+            'gui',
+            transform=lambda txt:
+            True if txt == 'True' else False
+        )
 
     all_env_arguments = {
         'resource_path': (
@@ -86,7 +123,6 @@ def make_gz_server(
 
     for arg_name, details in all_env_arguments.items():
         descr, env_var = details
-
         description.add_action(
             DeclareLaunchArgument(
                 arg_name,
@@ -112,117 +148,176 @@ def make_gz_server(
             log(
                 msg=do_format(
                     (
-                        'Creating GZ server:'
-                        '\n - World file used: {world_file}'
-                        '\n - Path lookup env variable:'
+                        'Creating GZ sim server using:'
+                        '\n- With gui ?: {gui}'
+                        '\n- World: {world}'
+                        '\n- With env:'
                         '\n{env}'
                     ),
-                    world_file=get_configs('world_file'),
+                    gui=gui,
+                    world=world,
                     env=apply(
-                        pformat,
+                        dict_to_string,
                         get_envs(
                             (
                                 env_name
                                 for _, env_name in all_env_arguments.values()
                             ),
                             as_dict=True
-                        )
+                        ),
+                        kv_header='--> ',
                     )
                 ),
                 logger=logger,
-            )
+            ),
+            set_config(
+                name='gz_sim_args',
+                value=apply(
+                    # This appends '-s' when gui is False
+                    lambda world, have_gui:
+                    world if have_gui else world + ' -s',
+                    world, gui,
+                )
+            ),
         )
     )
 
     description.add_action(
         ExecuteProcess(
-            cmd=[
-                'gz', 'sim', LaunchConfiguration('world_file'), '-s'
-            ],
+            cmd=['gz', 'sim', LaunchConfiguration('gz_sim_args')],
+            # shell=True is mandatory when adding whitespaces inside cmd
+            shell=True,
         )
     )
 
     return description
 
 
-def make_gz_spawn(
+def __get_sdf_type_from(value: Text) -> Text:
+    value_path = Path(value)
+    if value_path.exists() and (value_path.suffix in ('.sdf', '.urdf')):
+        return 'sdf_filename'
+    else:
+        return 'sdf'
+
+
+def gz_spawn_entity(
         *,
+        model: Optional[Union[Path, Text]] = None,
+        name: Optional[Text] = None,
+        world: Optional[Text] = None,
+        timeout: Optional[int] = None,
         description: LaunchDescription = LaunchDescription(),
-        model_path: Optional[Path] = None,
 ) -> LaunchDescription:
-    """TODO."""
-    if model_path is None:
+    """Spawn a model, with a given name, into an already running GZ server.
+
+    Parameters
+    ----------
+    model: Optional[Union[Path, Text]]
+      If not None, the model we wish to spawn. It may be either a file
+      (.sdf/.urdf) or directly a string.
+      When None, declare a LaunchArgument for it.
+    name: Optional[Text]
+      If not None, the name of the entity spawned inside gz.
+      When None, declare a LaunchArgument for it (default to 'tiago').
+    world: Optional[Path]
+      If not None, the GZ world we wish to spawn our model into.
+      When None, declare a LaunchArgument for it (default to 'empty').
+    timeout: Optional[int]
+      If not None, the timeout in ms associated to the gz service request.
+      When None, declare a LaunchArgument for it (default to 1000).
+    description: Optional[LaunchDescription]
+      LaunchDescription to use instead of creating a new one
+
+    Returns
+    -------
+    LaunchDescription
+      The launch description with that spanw the model into a gz server
+    """
+    if model is None:
         description.add_action(
             DeclareLaunchArgument(
-                'model_path',
-                description='Path of the entity model file we wish to spawn',
+                'model',
+                description=(
+                    'The model to spawn. '
+                    'Expecting either an sdf or urdf file path (checking '
+                    'files extensions) OR a raw SDF string model.'
+                ),
                 # default_value=LaunchConfiguration('model_path'),
             )
         )
-    else:
+        model = get_configs('model')
+
+    if name is None:
         description.add_action(
-            SetLaunchConfiguration('model_path', str(model_path))
+            DeclareLaunchArgument(
+                'name',
+                description='Name of the entity to spawn inside gz',
+                default_value='tiago',
+            )
         )
+        name = get_configs('name')
 
-    description.add_action(
-        DeclareLaunchArgument(
-            'entity_name',
-            description='Name of the entity spawn inside gz',
-            default_value='tiago',
+    if world is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'world',
+                description=(
+                    'Name of the world we wish to spawn the entity into'
+                ),
+                default_value='empty',
+            )
         )
-    )
+        world = get_configs('world')
 
-    description.add_action(
-        DeclareLaunchArgument(
-            'world',
-            description='Name of the world we wish to spawn the entity into',
-            default_value='empty',
+    if timeout is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'timeout',
+                description='Timeout associated to the gz request (in ms)',
+                default_value='1000',
+            )
         )
-    )
-
-    description.add_action(
-        DeclareLaunchArgument(
-            'service_timeout',
-            description='Timeout associated to the gz request (in ms)',
-            default_value='1000',
-        )
-    )
+        timeout = get_configs('timeout', transform=int)
 
     description.add_action(
         make_opaque_function_that(
             set_config(
-                name='service_name',
-                value=do_format(
-                    '/world/{name}/create',
-                    name=get_configs('world'),
-                )
-            ),
-            set_config(
-                name='service_request',
-                value=do_format(
-                    'sdf_filename: "{file_name}", name: "{entity_name}"',
-                    file_name=get_configs('model_path'),
-                    entity_name=get_configs('entity_name'),
+                'service_args',
+                do_format(
+                    (
+                        '-s /world/{world}/create'
+                        ' --reqtype gz.msgs.EntityFactory'
+                        ' --reptype gz.msgs.Boolean'
+                        ' --timeout {timeout}'
+                        ' --req \'name: "{name}", {model_type}: "{model}"\''
+                    ),
+                    world=world,
+                    timeout=timeout,
+                    name=name,
+                    model_type=apply(
+                        __get_sdf_type_from,
+                        model,
+                    ),
+                    model=model,
                 )
             ),
             log(
                 msg=do_format(
-                    'Try to spawn entity "{entity_name}" into "{world_name}"',
-                    entity_name=get_configs('entity_name'),
-                    world_name=get_configs('world'),
+                    'Try to spawn entity "{name}" into "{world}"',
+                    name=name,
+                    world=world,
                 ),
                 logger=logger,
             ),
             log(
                 msg=do_format(
-                    'Using GZ args:'
-                    '\n - service name: {name}'
-                    '\n - request: {req}',
-                    name=get_configs('service_name'),
-                    req=get_configs('service_request')
+                    'Using command:'
+                    '\n- gz service {args}',
+                    args=get_configs('service_args'),
                 ),
                 logger=logger,
-                level=logging.DEBUG,
+                level=DEBUG,
             )
         )
     )
@@ -230,12 +325,9 @@ def make_gz_spawn(
     description.add_action(
         ExecuteProcess(
             cmd=[
-                'gz', 'service', '-s', LaunchConfiguration('service_name'),
-                '--reqtype', 'gz.msgs.EntityFactory',
-                '--reptype', 'gz.msgs.Boolean',
-                '--timeout', LaunchConfiguration('service_timeout'),
-                '--req', LaunchConfiguration('service_request'),
+                'gz', 'service', LaunchConfiguration('service_args'),
             ],
+            shell=True,
         )
     )
 

@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
 """tiago_sim launch module main entry points."""
-from launch.logging import get_logger
-
-logger = get_logger('launch.user')
-
 from .arguments import (
-    make_arguments_from_yaml,
+    declare_arguments_from_yaml,
 )
 from .gz import (
-    make_gz_server,
-    make_gz_spawn,
+    gz_server,
+    gz_spawn_entity,
+)
+from .logging import (
+    logger,
 )
 from .robot_description import (
     make_robot_description_from_xacro,
@@ -18,11 +17,18 @@ from .robot_description import (
 from .robot_state_publisher import (
     make_robot_state_publisher
 )
+from .utils import (
+    dict_to_string,
+)
+
 __all__ = [
     'logger',
 
+    # utils
+    'dict_to_string',
+
     # arguments
-    'make_arguments_from_yaml',
+    'declare_arguments_from_yaml',
 
     # robot_description
     'make_robot_description_from_xacro',
@@ -31,6 +37,6 @@ __all__ = [
     'make_robot_state_publisher',
 
     # gz
-    'make_gz_server',
-    'make_gz_spawn',
+    'gz_server',
+    'gz_spawn_entity',
 ]

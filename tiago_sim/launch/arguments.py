@@ -18,15 +18,15 @@ from launch.actions import (
     DeclareLaunchArgument,
 )
 
-from . import logger
+from .logging import logger
 
 
-def make_arguments_from_yaml(
+def declare_arguments_from_yaml(
         file_path: Path,
         *,
         description: LaunchDescription = LaunchDescription(),
 ) -> Tuple[LaunchDescription, List[Text]]:
-    """Create a Descrition with arguments directly imported from a yaml.
+    """Declare arguments directly imported from a yaml.
 
     Parameters
     ----------
@@ -45,8 +45,11 @@ def make_arguments_from_yaml(
 
     arg_names = []
 
-    logger.debug('Adding new launch arguments from yaml:')
-    logger.debug('{path}'.format(path=file_path))
+    logger.debug(
+        'Adding new launch arguments from yaml:\n{path}'.format(
+            path=file_path
+        )
+    )
     for name, params in load_yaml(file_path).items():
         logger.debug('- {name}'.format(name=name))
         arg_names.append(name)

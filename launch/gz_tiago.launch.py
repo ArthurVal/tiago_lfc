@@ -8,14 +8,18 @@ from pathlib import (
 
 from ament_index_python.packages import get_package_share_directory
 
+from launch import (
+    LaunchDescription,
+)
+
 from launch_ros.actions import (
     Node,
 )
 
 from tiago_sim.launch import (
-    make_arguments_from_yaml,
-    make_gz_server,
-    make_gz_spawn,
+    declare_arguments_from_yaml,
+    gz_server,
+    gz_spawn_entity,
     make_robot_description_from_xacro,
     make_robot_state_publisher,
 )
@@ -30,10 +34,15 @@ from tiago_sim.opaque_function import (
 def generate_launch_description():
     """TODO."""
     # This must be first, since make_gz_server force use_sim_time to True
-    description = make_gz_server()
+    description = LaunchDescription()
 
+    # make_gz_server()
     description.add_action(
         make_opaque_function_that(
+            set_config(
+                'use_sim_time',
+                'True',
+            ),
             # Force set the world used by gz_spawn to the one used to populate
             # the server
             set_config(
@@ -46,7 +55,7 @@ def generate_launch_description():
         )
     )
 
-    description, args_names = make_arguments_from_yaml(
+    description, args_names = declare_arguments_from_yaml(
         file_path=Path(
             get_package_share_directory('tiago_description'),
             'config',
@@ -91,7 +100,7 @@ def generate_launch_description():
         )
     )
 
-    return make_gz_spawn(
+    return gz_spawn_entity(
         model_path=tiago_urdf_file,
         description=description,
     )
