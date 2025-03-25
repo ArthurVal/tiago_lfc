@@ -2,7 +2,7 @@
 
 """ROS2 launch file launching a GZ server."""
 
-from tiago_lfc.launch import (
+from tiago_sim.launch import (
     make_gz_server,
 )
 

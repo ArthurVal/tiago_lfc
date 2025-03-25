@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""tiago_lfc launch module main entry points."""
+"""tiago_sim launch module main entry points."""
 from launch.logging import get_logger
 
 logger = get_logger('launch.user')

@@ -26,7 +26,7 @@ from launch.substitutions import (
     LaunchConfiguration,
 )
 
-from tiago_lfc.opaque_function import (
+from tiago_sim.opaque_function import (
     apply,
     do_format,
     get_configs,

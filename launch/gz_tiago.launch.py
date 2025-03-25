@@ -12,14 +12,14 @@ from launch_ros.actions import (
     Node,
 )
 
-from tiago_lfc.launch import (
+from tiago_sim.launch import (
     make_arguments_from_yaml,
     make_gz_server,
     make_gz_spawn,
     make_robot_description_from_xacro,
     make_robot_state_publisher,
 )
-from tiago_lfc.opaque_function import (
+from tiago_sim.opaque_function import (
     apply,
     get_configs,
     make_opaque_function_that,

@@ -20,7 +20,7 @@ from launch import (
     LaunchDescription,
 )
 
-from tiago_lfc.opaque_function import (
+from tiago_sim.opaque_function import (
     apply,
     do_format,
     from_xacro,
