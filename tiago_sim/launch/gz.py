@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""TODO."""
+"""Add utils launch function managing GZ stuff."""
 
 import logging
 from pathlib import (
