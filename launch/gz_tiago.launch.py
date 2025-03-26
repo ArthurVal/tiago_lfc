@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-"""TODO."""
-
+"""Completely launch tiago inside GZ in one go."""
 from pathlib import (
     Path,
 )
@@ -31,7 +30,7 @@ from tiago_sim.opaque_function import (
 
 
 def generate_launch_description():
-    """TODO."""
+    """Launch tiago within GZ."""
     description, args_names = declare_arguments_from_yaml(
         file_path=Path(
             get_package_share_directory('tiago_description'),
