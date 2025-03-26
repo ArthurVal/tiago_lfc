@@ -51,6 +51,7 @@ def generate_launch_description():
     # We add it by hand.
     args_names.append('use_sim_time')
 
+    # TODO: create a tmp file ?
     tiago_urdf_file = Path(
         get_package_share_directory('tiago_description'),
         'robots',
@@ -71,7 +72,6 @@ def generate_launch_description():
     run_robot_state_publisher(
         robot_description=LaunchConfiguration('robot_description'),
         use_sim_time=LaunchConfiguration('use_sim_time'),
-        namespace='',
         description=description
     )
 
@@ -79,6 +79,8 @@ def generate_launch_description():
         description=description,
     )
 
+    # We reuse the world of gz_server declared as argument
+    # and update it (only use the stem) for gz_spawn_entity
     world = get_configs('world')
     description.add_action(
         make_opaque_function_that(
