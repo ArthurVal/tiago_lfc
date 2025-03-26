@@ -38,12 +38,14 @@ def make_opaque_function_that(
       - Values returning LaunchDescriptionEntity subclasses will be forwarded
         to the OpaqueFunction, otherwise they are filtered out
     """
-    def __is_subclass_of(base: Type):
-        return lambda v: (v is not None) and issubclass(type(v), base)
+    def __is_instance_of(*types: Iterable[Type]):
+        return lambda v: (v is not None) and any(
+            (isinstance(v, t) for t in types)
+        )
 
     def __wrapper(context: LaunchContext):
         return filter(
-            __is_subclass_of(LaunchDescriptionEntity),
+            __is_instance_of(LaunchDescriptionEntity),
             (substitue(context, v) for v in values)
         )
 
