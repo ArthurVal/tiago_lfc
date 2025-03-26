@@ -22,7 +22,7 @@ from launch.substitutions import (
 )
 
 from .context_value import (
-    ContextValue,
+    FunctionSubstitution,
     ContextValueOr,
     LaunchContext,
     T,
@@ -39,7 +39,7 @@ def get_configs(
         *,
         transform: Callable[[Text], T] = __do_nothing,
         as_dict: bool = False,
-) -> ContextValue[Union[T, Generator[T], Mapping[Text, T]]]:
+) -> FunctionSubstitution[Union[T, Generator[T], Mapping[Text, T]]]:
     """Retreive a LaunchConfiguration(name)'s value(s).
 
     Parameters
@@ -85,7 +85,7 @@ def get_configs(
 def set_config(
         name: Text,
         value: ContextValueOr[Text]
-) -> ContextValue[SetLaunchConfiguration]:
+) -> FunctionSubstitution[SetLaunchConfiguration]:
     """Set the LaunchConfiguration(name)'s value.
 
     Parameters
@@ -114,7 +114,7 @@ def get_envs(
         *,
         transform: Callable[[Text], T] = __do_nothing,
         as_dict: bool = False,
-) -> ContextValue[Union[T, Generator[T], Mapping[Text, T]]]:
+) -> FunctionSubstitution[Union[T, Generator[T], Mapping[Text, T]]]:
     """Retreive a EnvironmentVariable(name)'s value(s).
 
     Parameters

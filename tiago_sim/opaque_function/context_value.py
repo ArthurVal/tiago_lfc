@@ -26,29 +26,33 @@ T = TypeVar('T')
 # Value that is meant to be evaluated later on, given a LaunchContext.
 # It is the main return type of all function in the opaque_function module that
 # is meant to be plugged into each other.
-ContextValue: TypeAlias = Callable[[LaunchContext], T]
+FunctionSubstitution: TypeAlias = Callable[[LaunchContext], T]
 
 # Argument type of function from the opaque_function module that wish to be
 # plugged to other opaque_function outputs.
-ContextValueOr: TypeAlias = Union[ContextValue[T], T]
+ContextValueOr: TypeAlias = Union[FunctionSubstitution[T], T]
 
 
-def perform_substitution(context: LaunchContext, v: ContextValueOr[T]) -> T:
+def perform_substitution(
+        context: LaunchContext,
+        v: ContextValueOr[T]
+) -> T:
     """Return the result of v(context) when v is callable, otherwise v."""
     return v(context) if callable(v) else v
 
 
-def as_const(v: T) -> ContextValue[T]:
+def as_const(v: T) -> FunctionSubstitution[T]:
     """Create a ContextValue that always return v."""
 
     def impl(*args, **kwargs) -> T:
-        """Return v as constant, independently of the context."""
+        """Return {value} as constant, independently of the context."""
         return v
 
+    impl.__doc__ = impl.__doc__.format(value=v)
     return impl
 
 
-def no_opt() -> ContextValue[None]:
+def no_opt() -> FunctionSubstitution[None]:
     """Do nothing."""
     return as_const(None)
 
@@ -57,7 +61,7 @@ def apply(
         f: Callable[[Iterable[Any], Mapping[Text, Any]], T],
         *args: Iterable[ContextValueOr[Any]],
         **kwargs: Mapping[Text, ContextValueOr[Any]],
-) -> ContextValue[T]:
+) -> FunctionSubstitution[T]:
     """Call the function f with args and kwargs after evaluation.
 
     This should be used to call traditional functions on unevaluated arguments

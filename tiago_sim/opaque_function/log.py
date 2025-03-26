@@ -20,7 +20,7 @@ from launch.logging import (
 )
 
 from .context_value import (
-    ContextValue,
+    FunctionSubstitution,
     ContextValueOr,
     apply,
 )
@@ -30,7 +30,7 @@ def do_format(
         fmt: Text,
         *args: Iterable[ContextValueOr[Any]],
         **kwargs: Mapping[Text, ContextValueOr[Any]],
-) -> ContextValue[Text]:
+) -> FunctionSubstitution[Text]:
     """Call fmt.format(*args, **kwargs) after evaluating args/kwargs.
 
     Parameters
@@ -56,7 +56,7 @@ def log(
         level: ContextValueOr[int] = INFO,
         logger: Logger = get_logger('launch.user'),
         **kwargs,
-) -> ContextValue[None]:
+) -> FunctionSubstitution[None]:
     """Log.
 
     Parameters

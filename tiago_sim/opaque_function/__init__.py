@@ -13,7 +13,7 @@ from .config import (
     set_config,
 )
 from .context_value import (
-    ContextValue,
+    FunctionSubstitution,
     ContextValueOr,
     apply,
     as_const,
