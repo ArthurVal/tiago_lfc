@@ -19,18 +19,19 @@ from typing import (
 
 from launch import (
     LaunchContext,
+    Substitution,
 )
 
 T = TypeVar('T')
 
-# Value that is meant to be evaluated later on, given a LaunchContext.
-# It is the main return type of all function in the opaque_function module that
-# is meant to be plugged into each other.
+# Custom substitution using functional programming style (used by the
+# opaque_function module)
 FunctionSubstitution: TypeAlias = Callable[[LaunchContext], T]
 
-# Argument type of function from the opaque_function module that wish to be
+# Argument type of functions from the opaque_function module that wish to be
 # plugged to other opaque_function outputs.
 Substituable: TypeAlias = Union[
+    Substitution,
     FunctionSubstitution[T],
     T
 ]
@@ -38,26 +39,26 @@ Substituable: TypeAlias = Union[
 
 def perform_substitution(
         context: LaunchContext,
-        v: Substituable[T]
+        value: Substituable[T]
 ) -> T:
-    """Return the result of v(context) when v is callable, otherwise v."""
-    return v(context) if callable(v) else v
+    """Perform the substitution of the given value."""
+    if isinstance(value, Substitution):
+        return value.perform(context)
+    elif callable(value):
+        return value(context)
+    else:
+        return value
 
 
 def as_const(v: T) -> FunctionSubstitution[T]:
-    """Create a ContextValue that always return v."""
+    """Create a FunctionSubstitution that always return v."""
 
     def impl(*args, **kwargs) -> T:
-        """Return {value} as constant, independently of the context."""
+        """Return {value}, independently of the context."""
         return v
 
     impl.__doc__ = impl.__doc__.format(value=v)
     return impl
-
-
-def no_opt() -> FunctionSubstitution[None]:
-    """Do nothing."""
-    return as_const(None)
 
 
 def apply(
@@ -65,7 +66,7 @@ def apply(
         *args: Iterable[Substituable[Any]],
         **kwargs: Mapping[Text, Substituable[Any]],
 ) -> FunctionSubstitution[T]:
-    """Call the function f with args and kwargs after evaluation.
+    """Call the function f with args and kwargs after substitution.
 
     This should be used to call traditional functions on unevaluated arguments
     coming from the LaunchConfiguration context.
