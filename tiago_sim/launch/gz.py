@@ -210,22 +210,9 @@ def gz_server(
     return description
 
 
-def __get_sdf_type_from(value: Union[Path, Text]) -> Text:
-    if isinstance(value, Path) or any((
-            value.endswith(suffix)
-            for suffix in (
-                    '.sdf',
-                    '.urdf',
-            )
-    )):
-        return 'sdf_filename'
-    else:
-        return 'sdf'
-
-
 def gz_spawn_entity(
         *,
-        model: Optional[Union[Path, Text]] = None,
+        model: Optional[Path] = None,
         name: Optional[Text] = None,
         world: Optional[Text] = None,
         timeout_ms: Optional[int] = None,
@@ -236,8 +223,8 @@ def gz_spawn_entity(
     Parameters
     ----------
     model: Optional[Union[Path, Text]]
-      If not None, the model we wish to spawn. It may be either a file
-      (.sdf/.urdf) or directly a string.
+      If not None, the model we wish to spawn. It may be either a
+      .sdf or .urdf file.
       When None, declare a LaunchArgument for it.
     name: Optional[Text]
       If not None, the name of the entity spawned inside gz.
@@ -263,7 +250,7 @@ def gz_spawn_entity(
                 description=(
                     'The model to spawn. '
                     'Expecting either an sdf or urdf file path (checking '
-                    'files extensions) OR a raw SDF string model.'
+                    'files extensions).'
                 ),
                 # default_value=LaunchConfiguration('model_path'),
             )
@@ -312,15 +299,11 @@ def gz_spawn_entity(
                         ' --reqtype gz.msgs.EntityFactory'
                         ' --reptype gz.msgs.Boolean'
                         ' --timeout {timeout}'
-                        ' --req \'name: "{name}", {model_type}: "{model}"\''
+                        ' --req \'name: "{name}", sdf_filename: "{model}"\''
                     ),
                     world=world,
                     timeout=timeout_ms,
                     name=name,
-                    model_type=apply(
-                        __get_sdf_type_from,
-                        model,
-                    ),
                     model=model,
                 )
             ),
