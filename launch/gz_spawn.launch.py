@@ -8,5 +8,5 @@ from tiago_sim.launch import (
 
 
 def generate_launch_description():
-    """TODO."""
+    """Spawn a GZ entity model."""
     return gz_spawn_entity()
