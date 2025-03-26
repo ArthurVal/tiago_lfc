@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 
 """opaque_function module providing tools to generate ROS2 OpaqueFunctions."""
-from .algorithms import (
-    duplicate,
-    for_each,
-    reduce,
-    transform,
-)
 from .config import (
     get_configs,
     get_envs,
@@ -33,19 +27,13 @@ from .urdf import (
 __all__ = [
     # context_value
     'apply',
-    'ContextValue',
-    'ContextValueOr',
+    'FunctionSubstitution',
+    'Substituable',
     'perform_substitution',
     'as_const',
 
     # make_opaque_function_that
     'make_opaque_function_that',
-
-    # algorithms
-    'duplicate',
-    'for_each',
-    'reduce',
-    'transform',
 
     # config
     'get_envs',
