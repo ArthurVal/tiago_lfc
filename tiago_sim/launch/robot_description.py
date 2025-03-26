@@ -40,7 +40,7 @@ def __write_to_file(file_path: Path, txt: Text) -> None:
         f.write(txt)
 
 
-def make_robot_description_from_xacro(
+def add_robot_description_from_xacro(
         file_path: Path,
         mappings_config_names: Iterable[Text],
         *,

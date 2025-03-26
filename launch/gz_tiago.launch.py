@@ -20,7 +20,7 @@ from tiago_sim.launch import (
     declare_arguments_from_yaml,
     gz_server,
     gz_spawn_entity,
-    make_robot_description_from_xacro,
+    add_robot_description_from_xacro,
     make_robot_state_publisher,
 )
 from tiago_sim.opaque_function import (
@@ -75,7 +75,7 @@ def generate_launch_description():
         'tiago.urdf',
     )
 
-    description = make_robot_description_from_xacro(
+    description = add_robot_description_from_xacro(
         file_path=Path(
             get_package_share_directory('tiago_description'),
             'robots',

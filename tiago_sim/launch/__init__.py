@@ -12,7 +12,7 @@ from .logging import (
     logger,
 )
 from .robot_description import (
-    make_robot_description_from_xacro,
+    add_robot_description_from_xacro,
 )
 from .robot_state_publisher import (
     make_robot_state_publisher
@@ -31,7 +31,7 @@ __all__ = [
     'declare_arguments_from_yaml',
 
     # robot_description
-    'make_robot_description_from_xacro',
+    'add_robot_description_from_xacro',
 
     # robot_state_publisher
     'make_robot_state_publisher',

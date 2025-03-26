@@ -10,7 +10,7 @@ from ament_index_python.packages import get_package_share_directory
 
 from tiago_sim.launch import (
     declare_arguments_from_yaml,
-    make_robot_description_from_xacro,
+    add_robot_description_from_xacro,
 )
 
 
@@ -24,7 +24,7 @@ def generate_launch_description():
         ),
     )
 
-    description = make_robot_description_from_xacro(
+    description = add_robot_description_from_xacro(
         file_path=Path(
             get_package_share_directory('tiago_description'),
             'robots',
