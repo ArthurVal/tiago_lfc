@@ -3,7 +3,7 @@
 """Provide utils function to populate decription with robot_description."""
 
 from collections.abc import (
-    Iterable,
+    Mapping,
 )
 from pathlib import (
     Path,
@@ -53,9 +53,9 @@ def __write_to_file(
 
 
 def add_robot_description_from_xacro(
-        file_path: Path,
-        mappings_config_names: Iterable[Text],
         *,
+        file_path: Optional[Substituable[Path]] = None,
+        mappings: Optional[Substituable[Mapping[Text, Text]]] = None,
         output_file: Optional[Substituable[Path]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
@@ -63,10 +63,12 @@ def add_robot_description_from_xacro(
 
     Parameters
     ----------
-    file_path: Path
-      Path to the xacro file
-    mappings_config_names: Iterable[Text]
-      List of launch configuration names defining all xacro mappings used
+    file_path: Optional[Substituable[Path]]
+      Path to the xacro file. If None, declare a mandatory Launch argument
+      for it
+    mappings: Optional[Substituable[Mapping[Text, Text]]]
+      Mappings of the XACRO. If None, declare a launch argument for it
+      (default = {})
     description: LaunchDescription
       If defined, use this description instead of creating a new one
     output_file: Optional[Substituable[Path]]
@@ -77,6 +79,26 @@ def add_robot_description_from_xacro(
     LaunchDescription
       The launch description populated with robot_description
     """
+    if file_path is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'file_path',
+                description=(
+                    'XACRO file path use to create the robot_description URDF'
+                ),
+            )
+        )
+        file_path = LaunchConfiguration('file_path')
+
+    if mappings is None:
+        raise NotImplementedError(
+            (
+                'TODO: Need to implement a launch argument parser to transform'
+                ' a string to a dict OR a way to introspect xacro arguments'
+                ' a posteriori'
+            )
+        )
+
     if output_file is None:
         description.add_action(
             DeclareLaunchArgument(
@@ -90,11 +112,6 @@ def add_robot_description_from_xacro(
         )
         output_file = LaunchConfiguration('output_file')
 
-    logger.debug(
-        f'Using mappings from launch configuration:\n{mappings_config_names}'
-    )
-
-    all_mappings_args_value = get_configs(mappings_config_names, as_dict=True)
     description.add_action(
         make_opaque_function_that(
             log(
@@ -108,7 +125,7 @@ def add_robot_description_from_xacro(
                     file_path=file_path,
                     mappings=apply(
                         dict_to_string,
-                        all_mappings_args_value,
+                        value=mappings,
                         kv_header='--> ',
                     )
                 ),
@@ -118,7 +135,7 @@ def add_robot_description_from_xacro(
                 name='robot_description',
                 value=from_xacro(
                     file_path=file_path,
-                    mappings=all_mappings_args_value
+                    mappings=mappings,
                 ),
             ),
             apply(
