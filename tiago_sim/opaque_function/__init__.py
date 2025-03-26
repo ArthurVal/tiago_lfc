@@ -1,17 +1,13 @@
 #!/usr/bin/env python
 
 """opaque_function module providing tools to generate ROS2 OpaqueFunctions."""
+from .apply import (
+    apply,
+)
 from .config import (
     get_configs,
     get_envs,
     set_config,
-)
-from .context_value import (
-    FunctionSubstitution,
-    Substituable,
-    apply,
-    as_const,
-    substitue,
 )
 from .log import (
     do_format,
@@ -20,17 +16,23 @@ from .log import (
 from .make_opaque_function_that import (
     make_opaque_function_that,
 )
+from .substitute import (
+    FunctionSubstitution,
+    Substituable,
+    substitute,
+)
 from .urdf import (
     from_xacro,
 )
 
 __all__ = [
-    # context_value
-    'apply',
+    # substitute
     'FunctionSubstitution',
     'Substituable',
     'substitute',
-    'as_const',
+
+    # apply
+    'apply',
 
     # make_opaque_function_that
     'make_opaque_function_that',
