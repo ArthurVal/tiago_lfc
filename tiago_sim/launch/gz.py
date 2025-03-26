@@ -206,7 +206,7 @@ def gz_spawn_entity(
         model: Optional[Union[Path, Text]] = None,
         name: Optional[Text] = None,
         world: Optional[Text] = None,
-        timeout: Optional[int] = None,
+        timeout_ms: Optional[int] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Spawn a model, with a given name, into an already running GZ server.
@@ -270,7 +270,7 @@ def gz_spawn_entity(
         )
         world = get_configs('world')
 
-    if timeout is None:
+    if timeout_ms is None:
         description.add_action(
             DeclareLaunchArgument(
                 'timeout',
@@ -278,7 +278,7 @@ def gz_spawn_entity(
                 default_value='1000',
             )
         )
-        timeout = get_configs('timeout', transform=int)
+        timeout_ms = get_configs('timeout', transform=int)
 
     description.add_action(
         make_opaque_function_that(
@@ -293,7 +293,7 @@ def gz_spawn_entity(
                         ' --req \'name: "{name}", {model_type}: "{model}"\''
                     ),
                     world=world,
-                    timeout=timeout,
+                    timeout=timeout_ms,
                     name=name,
                     model_type=apply(
                         __get_sdf_type_from,
