@@ -16,6 +16,12 @@ from typing import (
 from launch import (
     LaunchDescription,
 )
+from launch.actions import (
+    DeclareLaunchArgument,
+)
+from launch.substitutions import (
+    LaunchConfiguration,
+)
 
 from tiago_sim.opaque_function import (
     Substituable,
@@ -36,9 +42,14 @@ from .utils import (
 )
 
 
-def __write_to_file(file_path: Path, txt: Text) -> None:
-    with open(file_path, 'w') as f:
-        f.write(txt)
+def __write_to_file(
+        file_path: Path,
+        txt: Text
+) -> None:
+    if file_path != '':
+        logger.debug(f'Dumping robot_description to {file_path}')
+        with open(file_path, 'w') as f:
+            f.write(txt)
 
 
 def add_robot_description_from_xacro(
@@ -66,8 +77,19 @@ def add_robot_description_from_xacro(
     LaunchDescription
       The launch description populated with robot_description
     """
-    logger.debug('Will populate "robot_description" from [XACRO]')
-    logger.debug(f'{file_path}')
+    if output_file is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'output_file',
+                description=(
+                    'If not empty, a valid file name (will be created) used to'
+                    ' write the robot_description into'
+                ),
+                default_value='',
+            )
+        )
+        output_file = LaunchConfiguration('output_file')
+
     logger.debug(
         f'Using mappings from launch configuration:\n{mappings_config_names}'
     )
@@ -78,9 +100,12 @@ def add_robot_description_from_xacro(
             log(
                 msg=do_format(
                     (
-                        'Xacro Mappings arguments evaluated to:'
+                        'Creating robot_description:'
+                        '\n- From XACRO {file_path}'
+                        '\n- Using mappings:'
                         '\n{mappings}'
                     ),
+                    file_path=file_path,
                     mappings=apply(
                         dict_to_string,
                         all_mappings_args_value,
@@ -96,22 +121,12 @@ def add_robot_description_from_xacro(
                     mappings=all_mappings_args_value
                 ),
             ),
-        )
-    )
-
-    if output_file is not None:
-        description.add_action(
-            make_opaque_function_that(
-                log(
-                    f'Dumping robot_description to {output_file}',
-                    logger=logger,
-                ),
-                apply(
-                    __write_to_file,
-                    file_path=output_file,
-                    txt=get_configs('robot_description'),
-                )
+            apply(
+                __write_to_file,
+                file_path=output_file,
+                txt=get_configs('robot_description'),
             )
         )
+    )
 
     return description
