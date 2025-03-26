@@ -35,9 +35,9 @@ def invoke(
     f: Callable[[Iterable[Any], Mapping[Text, Any]], T]
       Any callable responsible for transforming the evaluated values.
     args: Substituable[Iterable[Any]]
-      C-values evaluated and then forward to f
+      Substituable values evaluated and then forward to f
     kwargs: Substituable[Mapping[Text, Any]]
-      Mapping of key/c-values evaluated and then forward to f
+      Mapping of key/substituable values evaluated and then forward to f
 
     Returns
     -------
@@ -46,9 +46,16 @@ def invoke(
 
     """
     def impl(context: LaunchContext) -> T:
+        """Invoke {f} after evaluation of {args} and values of {kwargs}."""
         return f(
             *[substitute(context, arg) for arg in args],
             **{k: substitute(context, v) for k, v in kwargs.items()}
         )
+
+    impl.__doc__ = impl.__doc__.format(
+        f=f,
+        args=args,
+        kwargs=kwargs,
+    )
 
     return impl
