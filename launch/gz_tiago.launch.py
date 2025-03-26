@@ -21,7 +21,7 @@ from tiago_sim.launch import (
     gz_server,
     gz_spawn_entity,
     add_robot_description_from_xacro,
-    make_robot_state_publisher,
+    run_robot_state_publisher,
 )
 from tiago_sim.opaque_function import (
     apply,
@@ -86,7 +86,7 @@ def generate_launch_description():
         description=description,
     )
 
-    description = make_robot_state_publisher(
+    description = run_robot_state_publisher(
         description=description
     )
 

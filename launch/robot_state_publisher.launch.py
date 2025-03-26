@@ -8,10 +8,12 @@ from pathlib import (
 
 from ament_index_python.packages import get_package_share_directory
 
+from launch.substitutions import LaunchConfiguration
+
 from tiago_sim.launch import (
-    declare_arguments_from_yaml,
     add_robot_description_from_xacro,
-    make_robot_state_publisher,
+    declare_arguments_from_yaml,
+    run_robot_state_publisher,
 )
 
 
@@ -38,6 +40,7 @@ def generate_launch_description():
         description=description,
     )
 
-    return make_robot_state_publisher(
+    return run_robot_state_publisher(
+        robot_description=LaunchConfiguration('robot_description'),
         description=description
     )

@@ -9,8 +9,8 @@ from pathlib import (
 from ament_index_python.packages import get_package_share_directory
 
 from tiago_sim.launch import (
-    declare_arguments_from_yaml,
     add_robot_description_from_xacro,
+    declare_arguments_from_yaml,
 )
 
 

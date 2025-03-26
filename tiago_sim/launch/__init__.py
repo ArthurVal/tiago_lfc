@@ -15,7 +15,7 @@ from .robot_description import (
     add_robot_description_from_xacro,
 )
 from .robot_state_publisher import (
-    make_robot_state_publisher
+    run_robot_state_publisher
 )
 from .utils import (
     dict_to_string,
@@ -34,7 +34,7 @@ __all__ = [
     'add_robot_description_from_xacro',
 
     # robot_state_publisher
-    'make_robot_state_publisher',
+    'run_robot_state_publisher',
 
     # gz
     'gz_server',

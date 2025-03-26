@@ -2,11 +2,18 @@
 
 """TODO."""
 
+from typing import (
+    Optional,
+    Text,
+    Union,
+)
+
 from launch import (
     LaunchDescription,
 )
 from launch.actions import (
     DeclareLaunchArgument,
+    SetLaunchConfiguration,
 )
 from launch.substitutions import (
     LaunchConfiguration,
@@ -26,26 +33,46 @@ from .logging import (
 )
 
 
-def make_robot_state_publisher(
+def run_robot_state_publisher(
         *,
+        robot_description: Optional[Union[Text, LaunchConfiguration]] = None,
+        namespace: Optional[Union[Text, LaunchConfiguration]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Spawn a robot_state_publisher, using robot_description config."""
-    description.add_action(
-        DeclareLaunchArgument(
-            'robot_description',
-            description='Robot description used by the robot_state_publisher',
-            default_value='',
+    if robot_description is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'robot_description',
+                description=(
+                    'Robot description used by the robot_state_publisher'
+                ),
+            )
         )
-    )
+    else:
+        description.add_action(
+            SetLaunchConfiguration(
+                'robot_description',
+                robot_description
+            )
+        )
 
-    description.add_action(
-        DeclareLaunchArgument(
-            'namespace',
-            description='Namespace used to populate nodes',
-            default_value='',
+    if namespace is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'namespace',
+                description=(
+                    'Namespace used by the node'
+                ),
+                default_value='',
+            )
         )
-    )
+    else:
+        description.add_action(
+            SetLaunchConfiguration(
+                'namespace', namespace
+            )
+        )
 
     description.add_action(
         Node(
