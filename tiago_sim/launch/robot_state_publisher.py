@@ -37,6 +37,7 @@ def run_robot_state_publisher(
         *,
         robot_description: Optional[Union[Text, LaunchConfiguration]] = None,
         namespace: Optional[Union[Text, LaunchConfiguration]] = None,
+        use_sim_time: Optional[Union[bool, Text, LaunchConfiguration]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Spawn a robot_state_publisher Node.
@@ -49,6 +50,8 @@ def run_robot_state_publisher(
     namespace: Optional[Union[Text, LaunchConfiguration]]
       Namespace of the node. If not provided, declare a launch argument for it
       (default to '')
+    use_sim_time: Optional[Union[Text, LaunchConfiguration]]
+      Indicates if the clock comes from simulation or the normal OS wall clock
     description: LaunchDescription
       Optional LaunchDescription to use. Create a new one by default.
 
@@ -91,6 +94,24 @@ def run_robot_state_publisher(
             )
         )
 
+    if use_sim_time is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'use_sim_time',
+                choices=['True', 'False'],
+                default_value='False',
+            )
+        )
+    else:
+        description.add_action(
+            SetLaunchConfiguration(
+                'use_sim_time',
+                use_sim_time
+                if not isinstance(use_sim_time, bool)
+                else str(use_sim_time)
+            )
+        )
+
     description.add_action(
         Node(
             package='robot_state_publisher',
@@ -103,7 +124,7 @@ def run_robot_state_publisher(
                         'robot_description'
                     ),
                     'use_sim_time': LaunchConfiguration(
-                        'use_sim_time', default='False'
+                        'use_sim_time'
                     ),
                 }
             ],
