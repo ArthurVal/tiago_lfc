@@ -21,9 +21,6 @@ from .substitute import (
     Substituable,
     substitute,
 )
-from .urdf import (
-    from_xacro,
-)
 
 __all__ = [
     # substitute
@@ -45,7 +42,4 @@ __all__ = [
     # log
     'do_format',
     'log',
-
-    # urdf
-    'from_xacro',
 ]

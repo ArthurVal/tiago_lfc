@@ -23,11 +23,14 @@ from launch.substitutions import (
     LaunchConfiguration,
 )
 
+from launch_param_builder import (
+    load_xacro,
+)
+
 from tiago_sim.opaque_function import (
     Substituable,
     apply,
     do_format,
-    from_xacro,
     get_configs,
     log,
     make_opaque_function_that,
@@ -135,7 +138,8 @@ def add_robot_description_from_xacro(
             ),
             set_config(
                 name='robot_description',
-                value=from_xacro(
+                value=apply(
+                    load_xacro,
                     file_path=file_path,
                     mappings=mappings,
                 ),
