@@ -37,7 +37,7 @@ Substituable: TypeAlias = Union[
 ]
 
 
-def perform_substitution(
+def substitue(
         context: LaunchContext,
         value: Substituable[T]
 ) -> T:
@@ -88,8 +88,8 @@ def apply(
     """
     def impl(context: LaunchContext) -> T:
         return f(
-            *[perform_substitution(context, arg) for arg in args],
-            **{k: perform_substitution(context, v) for k, v in kwargs.items()}
+            *[substitue(context, arg) for arg in args],
+            **{k: substitue(context, v) for k, v in kwargs.items()}
         )
 
     return impl

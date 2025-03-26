@@ -11,7 +11,7 @@ from .context_value import (
     Substituable,
     apply,
     as_const,
-    perform_substitution,
+    substitue,
 )
 from .log import (
     do_format,
@@ -29,7 +29,7 @@ __all__ = [
     'apply',
     'FunctionSubstitution',
     'Substituable',
-    'perform_substitution',
+    'substitute',
     'as_const',
 
     # make_opaque_function_that

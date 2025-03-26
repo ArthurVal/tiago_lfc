@@ -26,7 +26,7 @@ from .context_value import (
     Substituable,
     LaunchContext,
     T,
-    perform_substitution,
+    substitue,
 )
 
 
@@ -103,7 +103,7 @@ def set_config(
     def impl(context: LaunchContext) -> SetLaunchConfiguration:
         return SetLaunchConfiguration(
             name,
-            perform_substitution(context, value)
+            substitue(context, value)
         )
 
     return impl
