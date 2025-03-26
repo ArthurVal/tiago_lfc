@@ -23,7 +23,7 @@ from launch.substitutions import (
 
 from .context_value import (
     FunctionSubstitution,
-    ContextValueOr,
+    Substituable,
     LaunchContext,
     T,
     perform_substitution,
@@ -84,7 +84,7 @@ def get_configs(
 
 def set_config(
         name: Text,
-        value: ContextValueOr[Text]
+        value: Substituable[Text]
 ) -> FunctionSubstitution[SetLaunchConfiguration]:
     """Set the LaunchConfiguration(name)'s value.
 

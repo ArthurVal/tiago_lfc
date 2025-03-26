@@ -14,7 +14,7 @@ from .config import (
 )
 from .context_value import (
     FunctionSubstitution,
-    ContextValueOr,
+    Substituable,
     apply,
     as_const,
     perform_substitution,

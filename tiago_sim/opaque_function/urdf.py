@@ -16,14 +16,14 @@ from launch_param_builder import load_xacro
 
 from .context_value import (
     FunctionSubstitution,
-    ContextValueOr,
+    Substituable,
     apply,
 )
 
 
 def from_xacro(
-        file_path: ContextValueOr[Path],
-        mappings: ContextValueOr[Mapping[Text, Text]] = {}
+        file_path: Substituable[Path],
+        mappings: Substituable[Mapping[Text, Text]] = {}
 ) -> FunctionSubstitution[Text]:
     """Return an URDF string from the given xacro file.
 

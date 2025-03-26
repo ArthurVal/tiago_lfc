@@ -21,13 +21,13 @@ from launch.actions import (
 )
 
 from .context_value import (
-    ContextValueOr,
+    Substituable,
     perform_substitution,
 )
 
 
 def make_opaque_function_that(
-        *values: Iterable[ContextValueOr[Any]]
+        *values: Iterable[Substituable[Any]]
 ) -> OpaqueFunction:
     """Create an OpaqueFunction from the given context's values.
 

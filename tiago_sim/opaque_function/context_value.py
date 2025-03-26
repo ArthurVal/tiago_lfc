@@ -30,12 +30,15 @@ FunctionSubstitution: TypeAlias = Callable[[LaunchContext], T]
 
 # Argument type of function from the opaque_function module that wish to be
 # plugged to other opaque_function outputs.
-ContextValueOr: TypeAlias = Union[FunctionSubstitution[T], T]
+Substituable: TypeAlias = Union[
+    FunctionSubstitution[T],
+    T
+]
 
 
 def perform_substitution(
         context: LaunchContext,
-        v: ContextValueOr[T]
+        v: Substituable[T]
 ) -> T:
     """Return the result of v(context) when v is callable, otherwise v."""
     return v(context) if callable(v) else v
@@ -59,8 +62,8 @@ def no_opt() -> FunctionSubstitution[None]:
 
 def apply(
         f: Callable[[Iterable[Any], Mapping[Text, Any]], T],
-        *args: Iterable[ContextValueOr[Any]],
-        **kwargs: Mapping[Text, ContextValueOr[Any]],
+        *args: Iterable[Substituable[Any]],
+        **kwargs: Mapping[Text, Substituable[Any]],
 ) -> FunctionSubstitution[T]:
     """Call the function f with args and kwargs after evaluation.
 

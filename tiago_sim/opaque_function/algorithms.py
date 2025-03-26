@@ -12,7 +12,7 @@ from typing import (
 
 from .context_value import (
     FunctionSubstitution,
-    ContextValueOr,
+    Substituable,
     LaunchContext,
     T,
     perform_substitution,
@@ -20,7 +20,7 @@ from .context_value import (
 
 
 def duplicate(
-        value: ContextValueOr[T],
+        value: Substituable[T],
         N: int,
 ) -> FunctionSubstitution[Generator[T]]:
     """Duplicate the evaluated value N times.
@@ -46,7 +46,7 @@ def duplicate(
 
 def for_each(
         f: Callable[[Any], None],
-        values: ContextValueOr[Iterable[Any]],
+        values: Substituable[Iterable[Any]],
 ) -> FunctionSubstitution[None]:
     """Call f() for each values contain within values.
 
@@ -71,7 +71,7 @@ def for_each(
 
 def transform(
         f: Callable[[Any], Any],
-        values: ContextValueOr[Iterable[Any]],
+        values: Substituable[Iterable[Any]],
 ) -> FunctionSubstitution[Generator[Any]]:
     """Transform the iterable values into a Generator containing f(v).
 
@@ -104,8 +104,8 @@ def transform(
 
 def reduce(
         f: Callable[[T, Any], T],
-        init: ContextValueOr[T],
-        values: ContextValueOr[Iterable[Any]],
+        init: Substituable[T],
+        values: Substituable[Iterable[Any]],
 ) -> FunctionSubstitution[T]:
     """Reduce the given values using init = f(init, v) for each values.
 
