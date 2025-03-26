@@ -35,6 +35,7 @@ from tiago_sim.opaque_function import (
 )
 
 from .logging import (
+    Logger,
     logger,
 )
 from .utils import (
@@ -44,10 +45,12 @@ from .utils import (
 
 def __write_to_file(
         file_path: Path,
-        txt: Text
+        txt: Text,
+        *,
+        logger: Logger = logger,
 ) -> None:
     if file_path != '':
-        logger.debug(f'Dumping robot_description to {file_path}')
+        logger.info(f'Dumping robot_description to {file_path}')
         with open(file_path, 'w') as f:
             f.write(txt)
 
@@ -142,6 +145,7 @@ def add_robot_description_from_xacro(
                 __write_to_file,
                 file_path=output_file,
                 txt=get_configs('robot_description'),
+                logger=logger,
             )
         )
     )
