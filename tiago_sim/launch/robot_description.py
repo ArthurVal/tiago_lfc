@@ -18,6 +18,7 @@ from launch import (
 )
 
 from tiago_sim.opaque_function import (
+    Substituable,
     apply,
     do_format,
     from_xacro,
@@ -44,8 +45,8 @@ def add_robot_description_from_xacro(
         file_path: Path,
         mappings_config_names: Iterable[Text],
         *,
+        output_file: Optional[Substituable[Path]] = None,
         description: LaunchDescription = LaunchDescription(),
-        output_file: Optional[Path] = None,
 ) -> LaunchDescription:
     """Create a Configuration with the robot_description from a xacro.
 
@@ -57,7 +58,7 @@ def add_robot_description_from_xacro(
       List of launch configuration names defining all xacro mappings used
     description: LaunchDescription
       If defined, use this description instead of creating a new one
-    output_file: Optional[Path]
+    output_file: Optional[Substituable[Path]]
       If given, will write the content of robot_description to the given file
 
     Returns
