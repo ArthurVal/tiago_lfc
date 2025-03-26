@@ -23,13 +23,15 @@ from tiago_sim.launch import (
     run_robot_state_publisher,
 )
 from tiago_sim.opaque_function import (
+    apply,
     get_configs,
+    make_opaque_function_that,
+    set_config,
 )
 
 
 def generate_launch_description():
     """TODO."""
-    # This must be first, since make_gz_server force use_sim_time to True
     description, args_names = declare_arguments_from_yaml(
         file_path=Path(
             get_package_share_directory('tiago_description'),
@@ -49,7 +51,6 @@ def generate_launch_description():
     # We add it by hand.
     args_names.append('use_sim_time')
 
-    # gz_spawn needs an URDF file, we use this this location (TBD)
     tiago_urdf_file = Path(
         get_package_share_directory('tiago_description'),
         'robots',
@@ -75,15 +76,26 @@ def generate_launch_description():
     )
 
     gz_server(
-        world='empty.sdf',
-        gui=True,
         description=description,
+    )
+
+    world = get_configs('world')
+    description.add_action(
+        make_opaque_function_that(
+            set_config(
+                'world',
+                apply(
+                    lambda w: Path(w).stem,
+                    world
+                )
+            )
+        )
     )
 
     gz_spawn_entity(
         model=tiago_urdf_file,
         name='tiago',
-        world='empty',
+        world=world,
         timeout_ms=1000,
         description=description,
     )
