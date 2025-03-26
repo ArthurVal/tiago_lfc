@@ -20,8 +20,8 @@ from tiago_sim.launch import (
 def generate_launch_description():
     """Spawn a robot_state_publisher, using robot_description provided."""
     # NOTE: We don't use Include... from launch stuff because otherwise
-    # arguments coming from included launch file don't appear when doing
-    # `ros2 launch <pkg> <launch> -s`
+    # arguments coming from included launch file are not present when doing
+    # `ros2 launch <pkg> <launch> -s` ...
     description, args_names = declare_arguments_from_yaml(
         file_path=Path(
             get_package_share_directory('tiago_description'),
@@ -30,7 +30,7 @@ def generate_launch_description():
         ),
     )
 
-    description = add_robot_description_from_xacro(
+    add_robot_description_from_xacro(
         file_path=Path(
             get_package_share_directory('tiago_description'),
             'robots',
@@ -40,7 +40,9 @@ def generate_launch_description():
         description=description,
     )
 
-    return run_robot_state_publisher(
+    run_robot_state_publisher(
         robot_description=LaunchConfiguration('robot_description'),
         description=description
     )
+
+    return description
