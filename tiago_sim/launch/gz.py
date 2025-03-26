@@ -32,7 +32,7 @@ from launch_ros.actions import (
 )
 
 from tiago_sim.opaque_function import (
-    apply,
+    invoke,
     do_format,
     get_configs,
     get_envs,
@@ -159,7 +159,7 @@ def gz_server(
                     ),
                     gui=gui,
                     world=world,
-                    env=apply(
+                    env=invoke(
                         dict_to_string,
                         get_envs(
                             (
@@ -175,7 +175,7 @@ def gz_server(
             ),
             set_config(
                 name='gz_sim_args',
-                value=apply(
+                value=invoke(
                     # This appends '-s' when gui is False
                     lambda world, have_gui:
                     world if have_gui else world + ' -s',

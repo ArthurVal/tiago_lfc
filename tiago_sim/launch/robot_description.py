@@ -29,7 +29,7 @@ from launch_param_builder import (
 
 from tiago_sim.opaque_function import (
     Substituable,
-    apply,
+    invoke,
     do_format,
     get_configs,
     log,
@@ -128,7 +128,7 @@ def add_robot_description_from_xacro(
                         '\n{mappings}'
                     ),
                     file_path=file_path,
-                    mappings=apply(
+                    mappings=invoke(
                         dict_to_string,
                         value=mappings,
                         kv_header='--> ',
@@ -138,13 +138,13 @@ def add_robot_description_from_xacro(
             ),
             set_config(
                 name='robot_description',
-                value=apply(
+                value=invoke(
                     load_xacro,
                     file_path=file_path,
                     mappings=mappings,
                 ),
             ),
-            apply(
+            invoke(
                 __write_to_file,
                 file_path=output_file,
                 txt=get_configs('robot_description'),

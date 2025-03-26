@@ -22,7 +22,7 @@ from tiago_sim.launch import (
     run_robot_state_publisher,
 )
 from tiago_sim.opaque_function import (
-    apply,
+    invoke,
     get_configs,
     make_opaque_function_that,
     set_config,
@@ -85,7 +85,7 @@ def generate_launch_description():
         make_opaque_function_that(
             set_config(
                 'world',
-                apply(
+                invoke(
                     lambda w: Path(w).stem,
                     world
                 )

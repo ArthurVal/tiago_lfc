@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 """opaque_function module providing tools to generate ROS2 OpaqueFunctions."""
-from .apply import (
-    apply,
-)
 from .config import (
     get_configs,
     get_envs,
     set_config,
+)
+from .functional import (
+    invoke,
 )
 from .log import (
     do_format,
@@ -28,8 +28,8 @@ __all__ = [
     'Substituable',
     'substitute',
 
-    # apply
-    'apply',
+    # functional
+    'invoke',
 
     # make_opaque_function_that
     'make_opaque_function_that',

@@ -19,10 +19,10 @@ from launch.logging import (
     get_logger,
 )
 
-from .apply import (
+from .functional import (
     FunctionSubstitution,
     Substituable,
-    apply,
+    invoke,
 )
 
 
@@ -47,7 +47,7 @@ def do_format(
     ContextValue[Text]
       A ContextValue calling fmt.format()
     """
-    return apply(str.format, fmt, *args, **kwargs)
+    return invoke(str.format, fmt, *args, **kwargs)
 
 
 def log(
@@ -73,4 +73,4 @@ def log(
     ContextValue[None]
       A ContextValue simply logging things after context' evaluation
     """
-    return apply(Logger.log, logger, level, msg, *args, **kwargs)
+    return invoke(Logger.log, logger, level, msg, *args, **kwargs)

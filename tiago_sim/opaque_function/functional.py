@@ -20,7 +20,7 @@ from .substitute import (
 )
 
 
-def apply(
+def invoke(
         f: Callable[[Iterable[Any], Mapping[Text, Any]], T],
         *args: Iterable[Substituable[Any]],
         **kwargs: Mapping[Text, Substituable[Any]],
