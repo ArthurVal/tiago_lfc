@@ -9,8 +9,6 @@ from pathlib import (
     Path,
 )
 from typing import (
-    Any,
-    Dict,
     Optional,
     Text,
     Union,
@@ -23,9 +21,14 @@ from launch.actions import (
     AppendEnvironmentVariable,
     DeclareLaunchArgument,
     ExecuteProcess,
+    UnsetLaunchConfiguration,
 )
 from launch.substitutions import (
     LaunchConfiguration,
+)
+
+from launch_ros.actions import (
+    Node,
 )
 
 from tiago_sim.opaque_function import (
@@ -190,12 +193,31 @@ def gz_server(
         )
     )
 
+    # FIXME: Is this needed ?
+    description.add_action(
+        Node(
+            package='ros_gz_bridge',
+            executable='parameter_bridge',
+            arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+            output='screen'
+        )
+    )
+
+    description.add_action(
+        UnsetLaunchConfiguration('gz_sim_args')
+    )
+
     return description
 
 
-def __get_sdf_type_from(value: Text) -> Text:
-    value_path = Path(value)
-    if value_path.exists() and (value_path.suffix in ('.sdf', '.urdf')):
+def __get_sdf_type_from(value: Union[Path, Text]) -> Text:
+    if isinstance(value, Path) or any((
+            value.endswith(suffix)
+            for suffix in (
+                    '.sdf',
+                    '.urdf',
+            )
+    )):
         return 'sdf_filename'
     else:
         return 'sdf'
@@ -329,6 +351,10 @@ def gz_spawn_entity(
             ],
             shell=True,
         )
+    )
+
+    description.add_action(
+        UnsetLaunchConfiguration('service_args')
     )
 
     return description

@@ -8,64 +8,45 @@ from pathlib import (
 
 from ament_index_python.packages import get_package_share_directory
 
-from launch import (
-    LaunchDescription,
+from launch.actions import (
+    SetLaunchConfiguration,
 )
-
-from launch_ros.actions import (
-    Node,
+from launch.substitutions import (
+    LaunchConfiguration,
 )
 
 from tiago_sim.launch import (
+    add_robot_description_from_xacro,
     declare_arguments_from_yaml,
     gz_server,
     gz_spawn_entity,
-    add_robot_description_from_xacro,
     run_robot_state_publisher,
 )
 from tiago_sim.opaque_function import (
-    apply,
     get_configs,
-    make_opaque_function_that,
-    set_config,
 )
 
 
 def generate_launch_description():
     """TODO."""
     # This must be first, since make_gz_server force use_sim_time to True
-    description = LaunchDescription()
-
-    # make_gz_server()
-    description.add_action(
-        make_opaque_function_that(
-            set_config(
-                'use_sim_time',
-                'True',
-            ),
-            # Force set the world used by gz_spawn to the one used to populate
-            # the server
-            set_config(
-                'world',
-                apply(
-                    lambda v: Path(v).stem,
-                    get_configs('world_file')
-                )
-            )
-        )
-    )
-
     description, args_names = declare_arguments_from_yaml(
         file_path=Path(
             get_package_share_directory('tiago_description'),
             'config',
             'tiago_configuration.yaml',
         ),
-        description=description,
+    )
+
+    description.add_action(
+        SetLaunchConfiguration(
+            'use_sim_time',
+            'True',
+        ),
     )
 
     # 'use_sim_time' it not included in the .yaml file
-    # We add it by hand (forced to true by make_gz_server)
+    # We add it by hand.
     args_names.append('use_sim_time')
 
     # gz_spawn needs an URDF file, we use this this location (TBD)
@@ -75,32 +56,36 @@ def generate_launch_description():
         'tiago.urdf',
     )
 
-    description = add_robot_description_from_xacro(
+    add_robot_description_from_xacro(
         file_path=Path(
             get_package_share_directory('tiago_description'),
             'robots',
             'tiago.urdf.xacro',
         ),
-        mappings_config_names=args_names,
+        mappings=get_configs(args_names, as_dict=True),
         output_file=tiago_urdf_file,
         description=description,
     )
 
-    description = run_robot_state_publisher(
+    run_robot_state_publisher(
+        robot_description=LaunchConfiguration('robot_description'),
+        use_sim_time=LaunchConfiguration('use_sim_time'),
+        namespace='',
         description=description
     )
 
-    # FIXME: Is this needed ?
-    description.add_action(
-        Node(
-            package='ros_gz_bridge',
-            executable='parameter_bridge',
-            arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
-            output='screen'
-        )
-    )
-
-    return gz_spawn_entity(
-        model_path=tiago_urdf_file,
+    gz_server(
+        world='empty.sdf',
+        gui=True,
         description=description,
     )
+
+    gz_spawn_entity(
+        model=tiago_urdf_file,
+        name='tiago',
+        world='empty',
+        timeout_ms=1000,
+        description=description,
+    )
+
+    return description
