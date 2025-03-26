@@ -37,15 +37,15 @@ def do_format(
     ----------
     fmt: Text
       Fmt string used by the log
-    *args: Iterable[ContextValueOr[Any]]
-      List of ContextValueOr forwarded to the .format() function
-    **kwargs: Mapping[Text, ContextValueOr[Any]]
-      Map of Keys/ContextValueOr forwarded to the .format() function
+    *args: Iterable[Substituable[Any]]
+      List of Substituable forwarded to the .format() function
+    **kwargs: Mapping[Text, Substituable[Any]]
+      Map of Keys/Substituable forwarded to the .format() function
 
     Returns
     -------
-    ContextValue[Text]
-      A ContextValue calling fmt.format()
+    FunctionSubstitution[Text]
+      A FunctionSubstitution calling fmt.format()
     """
     return invoke(str.format, fmt, *args, **kwargs)
 
@@ -61,7 +61,7 @@ def log(
 
     Parameters
     ----------
-    msg: ContextValueOr[Text]
+    msg: Substituable[Text]
       Msg to log
     level: int
       Log level used
@@ -70,7 +70,7 @@ def log(
 
     Returns
     -------
-    ContextValue[None]
-      A ContextValue simply logging things after context' evaluation
+    FunctionSubstitution[None]
+      A FunctionSubstitution simply logging things after context' evaluation
     """
     return invoke(Logger.log, logger, level, msg, *args, **kwargs)

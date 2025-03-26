@@ -54,8 +54,8 @@ def get_configs(
 
     Returns
     -------
-    ContextValue[..]
-      A ContextValue that create either:
+    FunctionSubstitution[..]
+      A FunctionSubstitution that create either:
         - T the transformed launch config's value only when names is a Text
         - Mapping[Text, T] when as_dict is true
         - Generator[T] otherwise
@@ -92,13 +92,13 @@ def set_config(
     ----------
     name: Text
       The launch configuration's name
-    value: ContextValueOr[Text]
+    value: Substituable[Text]
       The launch configuration's value we wish to set
 
     Returns
     -------
-    ContextValue[SetLaunchConfiguration]
-      A ContextValue that set he launch config's value and returns None
+    FunctionSubstitution[SetLaunchConfiguration]
+      A FunctionSubstitution that set he launch config's value and returns None
     """
     def impl(context: LaunchContext) -> SetLaunchConfiguration:
         return SetLaunchConfiguration(
@@ -129,8 +129,8 @@ def get_envs(
 
     Returns
     -------
-    ContextValue[..]
-      A ContextValue that create either:
+    FunctionSubstitution[..]
+      A FunctionSubstitution that create either:
         - T the transformed env variable's value only when names is a Text
         - Mapping[Text, T] when as_dict is true
         - Generator[T] otherwise
