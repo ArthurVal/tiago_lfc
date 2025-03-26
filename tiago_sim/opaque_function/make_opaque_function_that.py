@@ -22,7 +22,7 @@ from launch.actions import (
 
 from .context_value import (
     ContextValueOr,
-    from_context,
+    perform_substitution,
 )
 
 
@@ -44,7 +44,7 @@ def make_opaque_function_that(
     def __wrapper(context: LaunchContext):
         return filter(
             __is_subclass_of(LaunchDescriptionEntity),
-            (from_context(context, v) for v in values)
+            (perform_substitution(context, v) for v in values)
         )
 
     return OpaqueFunction(function=__wrapper)

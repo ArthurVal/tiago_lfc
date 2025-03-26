@@ -33,14 +33,19 @@ ContextValue: TypeAlias = Callable[[LaunchContext], T]
 ContextValueOr: TypeAlias = Union[ContextValue[T], T]
 
 
-def from_context(context: LaunchContext, v: ContextValueOr[T]) -> T:
+def perform_substitution(context: LaunchContext, v: ContextValueOr[T]) -> T:
     """Return the result of v(context) when v is callable, otherwise v."""
     return v(context) if callable(v) else v
 
 
 def as_const(v: T) -> ContextValue[T]:
-    """Return v as constant, independently of the context."""
-    return lambda _: v
+    """Create a ContextValue that always return v."""
+
+    def impl(*args, **kwargs) -> T:
+        """Return v as constant, independently of the context."""
+        return v
+
+    return impl
 
 
 def no_opt() -> ContextValue[None]:
@@ -75,8 +80,8 @@ def apply(
     """
     def impl(context: LaunchContext) -> T:
         return f(
-            *[from_context(context, arg) for arg in args],
-            **{k: from_context(context, v) for k, v in kwargs.items()}
+            *[perform_substitution(context, arg) for arg in args],
+            **{k: perform_substitution(context, v) for k, v in kwargs.items()}
         )
 
     return impl

@@ -15,7 +15,7 @@ from .context_value import (
     ContextValueOr,
     LaunchContext,
     T,
-    from_context,
+    perform_substitution,
 )
 
 
@@ -38,7 +38,7 @@ def duplicate(
       An iterable with value listed N times
     """
     def impl(context: LaunchContext) -> Generator[T]:
-        v = from_context(context, value)
+        v = perform_substitution(context, value)
         return (v for _ in range(N))
 
     return impl
@@ -63,7 +63,7 @@ def for_each(
       An iterable with the result of calling f() for each values
     """
     def impl(context: LaunchContext) -> None:
-        [f(v) for v in from_context(context, values)]
+        [f(v) for v in perform_substitution(context, values)]
         return None
 
     return impl
@@ -96,7 +96,7 @@ def transform(
     """
     def impl(context: LaunchContext) -> Generator[Any]:
         return (
-            f(v) for v in from_context(context, values)
+            f(v) for v in perform_substitution(context, values)
         )
 
     return impl
@@ -134,8 +134,8 @@ def reduce(
       The content of init after reduction
     """
     def impl(context: LaunchContext) -> T:
-        out = from_context(context, init)
-        for v in from_context(context, values):
+        out = perform_substitution(context, init)
+        for v in perform_substitution(context, values):
             out = f(out, v)
         return out
 

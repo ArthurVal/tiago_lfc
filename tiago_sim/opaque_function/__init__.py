@@ -17,7 +17,7 @@ from .context_value import (
     ContextValueOr,
     apply,
     as_const,
-    from_context,
+    perform_substitution,
 )
 from .log import (
     do_format,
@@ -35,7 +35,7 @@ __all__ = [
     'apply',
     'ContextValue',
     'ContextValueOr',
-    'from_context',
+    'perform_substitution',
     'as_const',
 
     # make_opaque_function_that
