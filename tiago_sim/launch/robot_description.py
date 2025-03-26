@@ -35,7 +35,6 @@ from tiago_sim.opaque_function import (
 )
 
 from .logging import (
-    Logger,
     logger,
 )
 from .utils import (
@@ -47,7 +46,7 @@ def __write_to_file(
         file_path: Path,
         txt: Text,
         *,
-        logger: Logger = logger,
+        logger: type(logger) = logger,
 ) -> None:
     if file_path != '':
         logger.info(f'Dumping robot_description to {file_path}')
