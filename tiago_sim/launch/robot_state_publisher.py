@@ -48,13 +48,6 @@ def make_robot_state_publisher(
     )
 
     description.add_action(
-        DeclareLaunchArgument(
-            'use_sim_time',
-            default_value='False',
-        )
-    )
-
-    description.add_action(
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
@@ -66,7 +59,7 @@ def make_robot_state_publisher(
                         'robot_description'
                     ),
                     'use_sim_time': LaunchConfiguration(
-                        'use_sim_time'
+                        'use_sim_time', default='False'
                     ),
                 }
             ],
