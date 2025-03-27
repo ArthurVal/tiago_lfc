@@ -91,7 +91,7 @@ def generate_launch_description():
     )
 
     gz_spawn_entity(
-        model=tiago_urdf_file,
+        model_path=tiago_urdf_file,
         name='tiago',
         world=world,
         timeout_ms=1000,

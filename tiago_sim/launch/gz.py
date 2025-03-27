@@ -32,7 +32,6 @@ from launch_ros.actions import (
 from .invoke import (
     Invoke,
     MaybeSubstituable,
-    evaluate,
     evaluate_as_dict,
 )
 from .logging import (
@@ -132,10 +131,9 @@ def gz_server(
                 choices=['False', 'True'],
             )
         )
-        gui = evaluate(
+        gui = Invoke(
+            lambda txt: True if txt == 'True' else False,
             LaunchConfiguration('gui'),
-        ).and_then(
-            lambda gui_txt: True if gui_txt == 'True' else False,
         )
 
     all_env_arguments = {
@@ -218,18 +216,18 @@ def gz_server(
 def __make_spawn_cmd(
         world: Text,
         name: Text,
-        model: Path,
+        model_path: Path,
         timeout_ms: int,
 ):
     logger.info(
         (
-            "Spawning '{name}' from '{model}'"
+            "Spawning '{name}' from '{path}'"
             '\n- Into world: {world}'
             '\n- Timeout: {timeout}ms'
         ).format(
             name=name,
             world=world,
-            model=model,
+            path=model_path,
             timeout=timeout_ms,
         )
     )
@@ -242,16 +240,16 @@ def __make_spawn_cmd(
         '--reptype', 'gz.msgs.Boolean',
         '--timeout', '{}'.format(timeout_ms),
         '--req',
-        'name: "{name}", sdf_filename: "{model}"'.format(
+        'name: "{name}", sdf_filename: "{path}"'.format(
             name=name,
-            model=model
+            path=model_path
         )
     ]
 
 
 def gz_spawn_entity(
         *,
-        model: Optional[MaybeSubstituable[Path]] = None,
+        model_path: Optional[MaybeSubstituable[Path]] = None,
         name: Optional[MaybeSubstituable[Text]] = None,
         world: Optional[MaybeSubstituable[Text]] = None,
         timeout_ms: Optional[MaybeSubstituable[int]] = None,
@@ -261,7 +259,7 @@ def gz_spawn_entity(
 
     Parameters
     ----------
-    model: Optional[MaybeSubstituable[Path]]
+    model_path: Optional[MaybeSubstituable[Path]]
       If not None, the model we wish to spawn. It may be either a
       .sdf or .urdf file.
       When None, declare a LaunchArgument for it.
@@ -282,19 +280,22 @@ def gz_spawn_entity(
     LaunchDescription
       The launch description with that spanw the model into a gz server
     """
-    if model is None:
+    if model_path is None:
         description.add_action(
             DeclareLaunchArgument(
-                'model',
+                'model_path',
                 description=(
-                    'The model to spawn. '
+                    'The model file to spawn. '
                     'Expecting either an sdf or urdf file path (checking '
                     'files extensions).'
                 ),
                 # default_value=LaunchConfiguration('model_path'),
             )
         )
-        model = LaunchConfiguration('model')
+        model_path = Invoke(
+            Path,
+            LaunchConfiguration('model_path')
+        )
 
     if name is None:
         description.add_action(
@@ -321,14 +322,14 @@ def gz_spawn_entity(
     if timeout_ms is None:
         description.add_action(
             DeclareLaunchArgument(
-                'timeout',
+                'timeout_ms',
                 description='Timeout associated to the gz request (in ms)',
                 default_value='1000',
             )
         )
         timeout_ms = Invoke(
             int,
-            LaunchConfiguration('timeout'),
+            LaunchConfiguration('timeout_ms'),
         )
 
     description.add_action(
@@ -336,7 +337,7 @@ def gz_spawn_entity(
             __make_spawn_cmd,
             world,
             name,
-            model,
+            model_path,
             timeout_ms,
         ).and_then(
             __log_then_forward_cmd
