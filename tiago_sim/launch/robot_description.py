@@ -29,8 +29,8 @@ from launch_param_builder import (
 )
 
 from .invoke import (
+    Invoke,
     MaybeSubstituable,
-    evaluate_as_dict,
 )
 from .logging import (
     logger,
@@ -40,20 +40,36 @@ from .utils import (
 )
 
 
-def __not_equals(v: Text):
-    return lambda x: x != v
+def __write_and_forward(
+        value: Text,
+        *,
+        file_path: Optional[Path] = None,
+) -> Text:
+    if file_path is not None:
+        logger.info('Dumping robot_description to {}'.format(file_path))
+        with open(file_path, 'w') as f:
+            f.write(value)
+
+    return value
 
 
-def __write_to_file_when_path(predicate, *, logger=logger):
-    def impl(file_path: Path, txt: Text):
-        if predicate(file_path):
-            logger.info(f'Dumping robot_description to {file_path}')
-            with open(file_path, 'w') as f:
-                f.write(txt)
+def __load_xacro(file_path: Path, **mappings: [Text]) -> Text:
+    logger.info(
+        (
+            'Loading XACRO:'
+            '\n- File "{file_path}"'
+            '\n- Using mappings:'
+            '\n{mappings}'
+        ).format(
+            file_path=file_path,
+            mappings=dict_to_string(
+                mappings,
+                kv_header='--> ',
+            )
+        )
+    )
 
-        return txt
-
-    return impl
+    return load_xacro(file_path, mappings=mappings)
 
 
 def add_robot_description_from_xacro(
@@ -114,34 +130,18 @@ def add_robot_description_from_xacro(
                 default_value='',
             )
         )
-        output_file = LaunchConfiguration('output_file')
+        output_file = Invoke(
+            lambda txt: None if txt == '' else Path(txt),
+            LaunchConfiguration('output_file'),
+        )
 
     description.add_action(
-        evaluate_as_dict(**mappings).and_then(
-            dict_to_string,
-            kv_header='--> ',
-        ).and_then_with_key(
-            'mappings',
-            (
-                'Creating robot_description:'
-                '\n- From XACRO {file_path}'
-                '\n- Using mappings:'
-                '\n{mappings}'
-            ).format,
+        Invoke(
+            __load_xacro,
             file_path=file_path,
+            **mappings,
         ).and_then(
-            logger.info
-        ),
-    )
-
-    description.add_action(
-        evaluate_as_dict(**mappings).and_then_with_key(
-            'mappings',
-            load_xacro,
-            file_path=file_path,
-        ).and_then_with_key(
-            'txt',
-            __write_to_file_when_path(__not_equals('')),
+            __write_and_forward,
             file_path=output_file,
         ).and_then_with_key(
             'value',
