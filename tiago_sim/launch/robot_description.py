@@ -18,6 +18,7 @@ from launch import (
 )
 from launch.actions import (
     DeclareLaunchArgument,
+    SetLaunchConfiguration,
 )
 from launch.substitutions import (
     LaunchConfiguration,
@@ -29,12 +30,9 @@ from launch_param_builder import (
 
 from tiago_sim.opaque_function import (
     Substituable,
-    invoke,
-    do_format,
     get_configs,
-    log,
+    invoke,
     make_opaque_function_that,
-    set_config,
 )
 
 from .logging import (
@@ -119,14 +117,15 @@ def add_robot_description_from_xacro(
 
     description.add_action(
         make_opaque_function_that(
-            log(
-                msg=do_format(
+            invoke(
+                logger.info,
+                invoke(
                     (
                         'Creating robot_description:'
                         '\n- From XACRO {file_path}'
                         '\n- Using mappings:'
                         '\n{mappings}'
-                    ),
+                    ).format,
                     file_path=file_path,
                     mappings=invoke(
                         dict_to_string,
@@ -134,9 +133,9 @@ def add_robot_description_from_xacro(
                         kv_header='--> ',
                     )
                 ),
-                logger=logger,
             ),
-            set_config(
+            invoke(
+                SetLaunchConfiguration,
                 name='robot_description',
                 value=invoke(
                     load_xacro,

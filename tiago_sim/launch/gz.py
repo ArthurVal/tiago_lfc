@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 
 """Add utils launch function managing GZ stuff."""
-
-from logging import (
-    DEBUG,
-)
 from pathlib import (
     Path,
 )
 from typing import (
     Optional,
     Text,
-    Union,
 )
 
 from launch import (
@@ -21,6 +16,7 @@ from launch.actions import (
     AppendEnvironmentVariable,
     DeclareLaunchArgument,
     ExecuteProcess,
+    SetLaunchConfiguration,
     UnsetLaunchConfiguration,
 )
 from launch.substitutions import (
@@ -32,13 +28,10 @@ from launch_ros.actions import (
 )
 
 from tiago_sim.opaque_function import (
-    invoke,
-    do_format,
     get_configs,
     get_envs,
-    log,
+    invoke,
     make_opaque_function_that,
-    set_config,
 )
 
 from .logging import (
@@ -148,15 +141,16 @@ def gz_server(
 
     description.add_action(
         make_opaque_function_that(
-            log(
-                msg=do_format(
+            invoke(
+                logger.info,
+                msg=invoke(
                     (
                         'Creating GZ sim server using:'
                         '\n- With gui ?: {gui}'
                         '\n- World: {world}'
                         '\n- With env:'
                         '\n{env}'
-                    ),
+                    ).format,
                     gui=gui,
                     world=world,
                     env=invoke(
@@ -171,9 +165,9 @@ def gz_server(
                         kv_header='--> ',
                     )
                 ),
-                logger=logger,
             ),
-            set_config(
+            invoke(
+                SetLaunchConfiguration,
                 name='gz_sim_args',
                 value=invoke(
                     # This appends '-s' when gui is False
@@ -291,38 +285,40 @@ def gz_spawn_entity(
 
     description.add_action(
         make_opaque_function_that(
-            set_config(
+            invoke(
+                SetLaunchConfiguration,
                 'service_args',
-                do_format(
+                invoke(
                     (
                         '-s /world/{world}/create'
                         ' --reqtype gz.msgs.EntityFactory'
                         ' --reptype gz.msgs.Boolean'
                         ' --timeout {timeout}'
                         ' --req \'name: "{name}", sdf_filename: "{model}"\''
-                    ),
+                    ).format,
                     world=world,
                     timeout=timeout_ms,
                     name=name,
                     model=model,
                 )
             ),
-            log(
-                msg=do_format(
-                    'Try to spawn entity "{name}" into "{world}"',
+            invoke(
+                logger.info,
+                msg=invoke(
+                    'Try to spawn entity "{name}" into "{world}"'.format,
                     name=name,
                     world=world,
                 ),
-                logger=logger,
             ),
-            log(
-                msg=do_format(
-                    'Using command:'
-                    '\n- gz service {args}',
+            invoke(
+                logger.debug,
+                msg=invoke(
+                    (
+                        'Using command:'
+                        '\n- gz service {args}'
+                    ).format,
                     args=get_configs('service_args'),
                 ),
-                logger=logger,
-                level=DEBUG,
             )
         )
     )

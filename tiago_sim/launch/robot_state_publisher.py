@@ -22,9 +22,8 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 
 from tiago_sim.opaque_function import (
-    do_format,
     get_configs,
-    log,
+    invoke,
     make_opaque_function_that,
 )
 
@@ -133,17 +132,17 @@ def run_robot_state_publisher(
 
     description.add_action(
         make_opaque_function_that(
-            log(
-                msg=do_format(
+            invoke(
+                logger.info,
+                msg=invoke(
                     (
                         'robot_state_publisher spawned with:'
                         '\n - namespace: "{ns}"'
                         '\n - use_sim_time: {sim_time}'
-                    ),
+                    ).format,
                     ns=get_configs('namespace'),
                     sim_time=get_configs('use_sim_time'),
                 ),
-                logger=logger,
             )
         )
     )

@@ -25,7 +25,6 @@ from tiago_sim.opaque_function import (
     invoke,
     get_configs,
     make_opaque_function_that,
-    set_config,
 )
 
 
@@ -83,7 +82,8 @@ def generate_launch_description():
     world = get_configs('world')
     description.add_action(
         make_opaque_function_that(
-            set_config(
+            invoke(
+                SetLaunchConfiguration,
                 'world',
                 invoke(
                     lambda w: Path(w).stem,

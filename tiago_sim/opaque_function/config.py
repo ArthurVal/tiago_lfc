@@ -13,9 +13,6 @@ from typing import (
     Union,
 )
 
-from launch.actions import (
-    SetLaunchConfiguration,
-)
 from launch.substitutions import (
     EnvironmentVariable,
     LaunchConfiguration,
@@ -24,9 +21,7 @@ from launch.substitutions import (
 from .substitute import (
     FunctionSubstitution,
     LaunchContext,
-    Substituable,
     T,
-    substitute,
 )
 
 
@@ -78,33 +73,6 @@ def get_configs(
                     transform(LaunchConfiguration(name).perform(context))
                     for name in names
                 )
-
-    return impl
-
-
-def set_config(
-        name: Text,
-        value: Substituable[Text]
-) -> FunctionSubstitution[SetLaunchConfiguration]:
-    """Set the LaunchConfiguration(name)'s value.
-
-    Parameters
-    ----------
-    name: Text
-      The launch configuration's name
-    value: Substituable[Text]
-      The launch configuration's value we wish to set
-
-    Returns
-    -------
-    FunctionSubstitution[SetLaunchConfiguration]
-      A FunctionSubstitution that set he launch config's value and returns None
-    """
-    def impl(context: LaunchContext) -> SetLaunchConfiguration:
-        return SetLaunchConfiguration(
-            name,
-            substitute(context, value)
-        )
 
     return impl
 

@@ -4,14 +4,9 @@
 from .config import (
     get_configs,
     get_envs,
-    set_config,
 )
 from .functional import (
     invoke,
-)
-from .log import (
-    do_format,
-    log,
 )
 from .make_opaque_function_that import (
     make_opaque_function_that,
@@ -37,9 +32,4 @@ __all__ = [
     # config
     'get_envs',
     'get_configs',
-    'set_config',
-
-    # log
-    'do_format',
-    'log',
 ]
