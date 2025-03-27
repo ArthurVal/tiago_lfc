@@ -11,13 +11,13 @@ from ament_index_python.packages import get_package_share_directory
 from launch.actions import (
     DeclareLaunchArgument,
 )
+from launch.substitutions import (
+    LaunchConfiguration,
+)
 
 from tiago_sim.launch import (
     add_robot_description_from_xacro,
     declare_arguments_from_yaml,
-)
-from tiago_sim.opaque_function import (
-    get_configs,
 )
 
 
@@ -48,7 +48,10 @@ def generate_launch_description():
             'robots',
             'tiago.urdf.xacro',
         ),
-        mappings=get_configs(args_names, as_dict=True),
+        mappings={
+            name: LaunchConfiguration(name)
+            for name in args_names
+        },
         description=description,
     )
 

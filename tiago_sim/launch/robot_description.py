@@ -28,13 +28,11 @@ from launch_param_builder import (
     load_xacro,
 )
 
-from tiago_sim.opaque_function import (
-    Substituable,
-    get_configs,
-    invoke,
-    make_opaque_function_that,
+from .invoke import (
+    Invoke,
+    MaybeSubstituable,
+    evaluate_as_dict,
 )
-
 from .logging import (
     logger,
 )
@@ -43,38 +41,42 @@ from .utils import (
 )
 
 
-def __write_to_file(
-        file_path: Path,
-        txt: Text,
-        *,
-        logger: type(logger) = logger,
-) -> None:
-    if file_path != '':
-        logger.info(f'Dumping robot_description to {file_path}')
-        with open(file_path, 'w') as f:
-            f.write(txt)
+def __not_equals(v: Text):
+    return lambda x: x != v
+
+
+def __write_to_file_when_path(predicate, *, logger=logger):
+    def impl(file_path: Path, txt: Text):
+        if predicate(file_path):
+            logger.info(f'Dumping robot_description to {file_path}')
+            with open(file_path, 'w') as f:
+                f.write(txt)
+
+        return txt
+
+    return impl
 
 
 def add_robot_description_from_xacro(
         *,
-        file_path: Optional[Substituable[Path]] = None,
-        mappings: Optional[Substituable[Mapping[Text, Text]]] = None,
-        output_file: Optional[Substituable[Path]] = None,
+        file_path: Optional[MaybeSubstituable[Path]] = None,
+        mappings: Optional[Mapping[Text, MaybeSubstituable[Text]]] = None,
+        output_file: Optional[MaybeSubstituable[Path]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Create a Configuration with the robot_description from a xacro.
 
     Parameters
     ----------
-    file_path: Optional[Substituable[Path]]
+    file_path: Optional[MaybeSubstituable[Path]]
       Path to the xacro file. If None, declare a mandatory Launch argument
       for it
-    mappings: Optional[Substituable[Mapping[Text, Text]]]
+    mappings: Optional[Mapping[Text, MaybeSubstituable[Text]]]
       Mappings of the XACRO. If None, declare a launch argument for it
       (default = {})
     description: LaunchDescription
       If defined, use this description instead of creating a new one
-    output_file: Optional[Substituable[Path]]
+    output_file: Optional[MaybeSubstituable[Path]]
       If given, will write the content of robot_description to the given file
 
     Returns
@@ -116,39 +118,36 @@ def add_robot_description_from_xacro(
         output_file = LaunchConfiguration('output_file')
 
     description.add_action(
-        make_opaque_function_that(
-            invoke(
-                logger.info,
-                invoke(
-                    (
-                        'Creating robot_description:'
-                        '\n- From XACRO {file_path}'
-                        '\n- Using mappings:'
-                        '\n{mappings}'
-                    ).format,
-                    file_path=file_path,
-                    mappings=invoke(
-                        dict_to_string,
-                        value=mappings,
-                        kv_header='--> ',
-                    )
-                ),
-            ),
-            invoke(
-                SetLaunchConfiguration,
-                name='robot_description',
-                value=invoke(
-                    load_xacro,
-                    file_path=file_path,
-                    mappings=mappings,
-                ),
-            ),
-            invoke(
-                __write_to_file,
-                file_path=output_file,
-                txt=get_configs('robot_description'),
-                logger=logger,
-            )
+        evaluate_as_dict(**mappings).and_then(
+            dict_to_string,
+            kv_header='--> ',
+        ).and_then_with_key(
+            'mappings',
+            (
+                'Creating robot_description:'
+                '\n- From XACRO {file_path}'
+                '\n- Using mappings:'
+                '\n{mappings}'
+            ).format,
+            file_path=file_path,
+        ).and_then(
+            logger.info
+        ),
+    )
+
+    description.add_action(
+        evaluate_as_dict(**mappings).and_then_with_key(
+            'mappings',
+            load_xacro,
+            file_path=file_path,
+        ).and_then_with_key(
+            'txt',
+            __write_to_file_when_path(__not_equals('')),
+            file_path=output_file,
+        ).and_then_with_key(
+            'value',
+            SetLaunchConfiguration,
+            name='robot_description',
         )
     )
 

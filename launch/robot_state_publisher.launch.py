@@ -8,6 +8,7 @@ from pathlib import (
 
 from ament_index_python.packages import get_package_share_directory
 
+from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
 from tiago_sim.launch import (
@@ -30,13 +31,27 @@ def generate_launch_description():
         ),
     )
 
+    # use_sim_time is used in tiago_description but not inside
+    # tiago_configuration.yaml. We add it by hand
+    description.add_action(
+        DeclareLaunchArgument(
+            'use_sim_time',
+            choices=['True', 'False'],
+            default_value='False'
+        )
+    )
+    args_names.append('use_sim_time')
+
     add_robot_description_from_xacro(
         file_path=Path(
             get_package_share_directory('tiago_description'),
             'robots',
             'tiago.urdf.xacro',
         ),
-        mappings_config_names=args_names,
+        mappings={
+            names: LaunchConfiguration(names)
+            for names in args_names
+        },
         description=description,
     )
 

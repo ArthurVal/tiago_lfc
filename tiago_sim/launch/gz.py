@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 """Add utils launch function managing GZ stuff."""
+from collections.abc import (
+    Mapping,
+)
 from pathlib import (
     Path,
 )
@@ -16,10 +19,9 @@ from launch.actions import (
     AppendEnvironmentVariable,
     DeclareLaunchArgument,
     ExecuteProcess,
-    SetLaunchConfiguration,
-    UnsetLaunchConfiguration,
 )
 from launch.substitutions import (
+    EnvironmentVariable,
     LaunchConfiguration,
 )
 
@@ -27,19 +29,60 @@ from launch_ros.actions import (
     Node,
 )
 
-from tiago_sim.opaque_function import (
-    get_configs,
-    get_envs,
-    invoke,
-    make_opaque_function_that,
+from .invoke import (
+    Invoke,
+    evaluate,
+    evaluate_as_dict,
 )
-
 from .logging import (
     logger,
 )
 from .utils import (
     dict_to_string,
 )
+
+
+def __log_then_forward_cmd(cmd):
+    logger.debug(
+        'Command: `{}`'.format(
+            ' '.join(cmd)
+        )
+    )
+    return cmd
+
+
+def __make_sim_cmd(
+        gui: bool,
+        world: Text,
+        envs: Mapping[Text, Text],
+):
+    logger.info(
+        (
+            'Creating GZ sim server using:'
+            '\n- With gui ?: {gui}'
+            '\n- World: {world}'
+            '\n- With env:'
+            '\n{envs}'
+        ).format(
+            gui=gui,
+            world=world,
+            envs=dict_to_string(
+                envs,
+                kv_header='--> ',
+            ),
+        )
+    )
+
+    cmd = [
+        'gz',
+        'sim',
+        world,
+    ]
+
+    if not gui:
+        cmd.append('-s')
+
+    return cmd
 
 
 def gz_server(
@@ -74,7 +117,7 @@ def gz_server(
                 default_value='empty.sdf'
             )
         )
-        world = get_configs('world')
+        world = LaunchConfiguration('world')
 
     if gui is None:
         description.add_action(
@@ -88,10 +131,10 @@ def gz_server(
                 choices=['False', 'True'],
             )
         )
-        gui = get_configs(
-            'gui',
-            transform=lambda txt:
-            True if txt == 'True' else False
+        gui = evaluate(
+            LaunchConfiguration('gui'),
+        ).and_then(
+            lambda gui_txt: True if gui_txt == 'True' else False,
         )
 
     all_env_arguments = {
@@ -140,54 +183,25 @@ def gz_server(
         )
 
     description.add_action(
-        make_opaque_function_that(
-            invoke(
-                logger.info,
-                msg=invoke(
-                    (
-                        'Creating GZ sim server using:'
-                        '\n- With gui ?: {gui}'
-                        '\n- World: {world}'
-                        '\n- With env:'
-                        '\n{env}'
-                    ).format,
-                    gui=gui,
-                    world=world,
-                    env=invoke(
-                        dict_to_string,
-                        get_envs(
-                            (
-                                env_name
-                                for _, env_name in all_env_arguments.values()
-                            ),
-                            as_dict=True
-                        ),
-                        kv_header='--> ',
-                    )
-                ),
+        Invoke(
+            __make_sim_cmd,
+            gui=gui,
+            world=world,
+            envs=evaluate_as_dict(
+                **{
+                    name: EnvironmentVariable(name)
+                    for _, name in all_env_arguments.values()
+                }
             ),
-            invoke(
-                SetLaunchConfiguration,
-                name='gz_sim_args',
-                value=invoke(
-                    # This appends '-s' when gui is False
-                    lambda world, have_gui:
-                    world if have_gui else world + ' -s',
-                    world, gui,
-                )
-            ),
+        ).and_then(
+            __log_then_forward_cmd,
+        ).and_then_with_key(
+            'cmd',
+            ExecuteProcess
         )
     )
 
-    description.add_action(
-        ExecuteProcess(
-            cmd=['gz', 'sim', LaunchConfiguration('gz_sim_args')],
-            # shell=True is mandatory when adding whitespaces inside cmd
-            shell=True,
-        )
-    )
-
-    # FIXME: Is this needed ?
+    # # FIXME: Is this needed ?
     description.add_action(
         Node(
             package='ros_gz_bridge',
@@ -197,11 +211,41 @@ def gz_server(
         )
     )
 
-    description.add_action(
-        UnsetLaunchConfiguration('gz_sim_args')
+    return description
+
+
+def __make_spawn_cmd(
+        world: Text,
+        name: Text,
+        model: Path,
+        timeout_ms: int,
+):
+    logger.info(
+        (
+            "Spawning '{name}' from '{model}'"
+            '\n- Into world: {world}'
+            '\n- Timeout: {timeout}ms'
+        ).format(
+            name=name,
+            world=world,
+            model=model,
+            timeout=timeout_ms,
+        )
     )
 
-    return description
+    return [
+        'gz',
+        'service',
+        '-s', '/world/{}/create'.format(world),
+        '--reqtype', 'gz.msgs.EntityFactory',
+        '--reptype', 'gz.msgs.Boolean',
+        '--timeout', '{}'.format(timeout_ms),
+        '--req',
+        'name: "{name}", sdf_filename: "{model}"'.format(
+            name=name,
+            model=model
+        )
+    ]
 
 
 def gz_spawn_entity(
@@ -249,7 +293,7 @@ def gz_spawn_entity(
                 # default_value=LaunchConfiguration('model_path'),
             )
         )
-        model = get_configs('model')
+        model = LaunchConfiguration('model')
 
     if name is None:
         description.add_action(
@@ -259,7 +303,7 @@ def gz_spawn_entity(
                 default_value='tiago',
             )
         )
-        name = get_configs('name')
+        name = LaunchConfiguration('name')
 
     if world is None:
         description.add_action(
@@ -271,7 +315,7 @@ def gz_spawn_entity(
                 default_value='empty',
             )
         )
-        world = get_configs('world')
+        world = LaunchConfiguration('world')
 
     if timeout_ms is None:
         description.add_action(
@@ -281,59 +325,24 @@ def gz_spawn_entity(
                 default_value='1000',
             )
         )
-        timeout_ms = get_configs('timeout', transform=int)
-
-    description.add_action(
-        make_opaque_function_that(
-            invoke(
-                SetLaunchConfiguration,
-                'service_args',
-                invoke(
-                    (
-                        '-s /world/{world}/create'
-                        ' --reqtype gz.msgs.EntityFactory'
-                        ' --reptype gz.msgs.Boolean'
-                        ' --timeout {timeout}'
-                        ' --req \'name: "{name}", sdf_filename: "{model}"\''
-                    ).format,
-                    world=world,
-                    timeout=timeout_ms,
-                    name=name,
-                    model=model,
-                )
-            ),
-            invoke(
-                logger.info,
-                msg=invoke(
-                    'Try to spawn entity "{name}" into "{world}"'.format,
-                    name=name,
-                    world=world,
-                ),
-            ),
-            invoke(
-                logger.debug,
-                msg=invoke(
-                    (
-                        'Using command:'
-                        '\n- gz service {args}'
-                    ).format,
-                    args=get_configs('service_args'),
-                ),
-            )
+        timeout_ms = Invoke(
+            int,
+            LaunchConfiguration('timeout'),
         )
-    )
 
     description.add_action(
-        ExecuteProcess(
-            cmd=[
-                'gz', 'service', LaunchConfiguration('service_args'),
-            ],
-            shell=True,
+        Invoke(
+            __make_spawn_cmd,
+            world,
+            name,
+            model,
+            timeout_ms,
+        ).and_then(
+            __log_then_forward_cmd
+        ).and_then_with_key(
+            'cmd',
+            ExecuteProcess,
         )
-    )
-
-    description.add_action(
-        UnsetLaunchConfiguration('service_args')
     )
 
     return description

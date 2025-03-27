@@ -8,6 +8,12 @@ from .gz import (
     gz_server,
     gz_spawn_entity,
 )
+from .invoke import (
+    FunctionSubstitution,
+    Invoke,
+    Substituable,
+    substitute,
+)
 from .logging import (
     logger,
 )
@@ -22,13 +28,21 @@ from .utils import (
 )
 
 __all__ = [
-    'logger',
-
-    # utils
-    'dict_to_string',
-
     # arguments
     'declare_arguments_from_yaml',
+
+    # gz
+    'gz_server',
+    'gz_spawn_entity',
+
+    # invoke
+    'FunctionSubstitution',
+    'Invoke',
+    'Substituable',
+    'substitute'
+
+    # logging
+    'logger',
 
     # robot_description
     'add_robot_description_from_xacro',
@@ -36,7 +50,6 @@ __all__ = [
     # robot_state_publisher
     'run_robot_state_publisher',
 
-    # gz
-    'gz_server',
-    'gz_spawn_entity',
+    # utils
+    'dict_to_string',
 ]

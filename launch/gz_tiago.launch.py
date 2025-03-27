@@ -15,16 +15,12 @@ from launch.substitutions import (
 )
 
 from tiago_sim.launch import (
+    Invoke,
     add_robot_description_from_xacro,
     declare_arguments_from_yaml,
     gz_server,
     gz_spawn_entity,
     run_robot_state_publisher,
-)
-from tiago_sim.opaque_function import (
-    invoke,
-    get_configs,
-    make_opaque_function_that,
 )
 
 
@@ -62,7 +58,10 @@ def generate_launch_description():
             'robots',
             'tiago.urdf.xacro',
         ),
-        mappings=get_configs(args_names, as_dict=True),
+        mappings={
+            names: LaunchConfiguration(names)
+            for names in args_names
+        },
         output_file=tiago_urdf_file,
         description=description,
     )
@@ -79,17 +78,15 @@ def generate_launch_description():
 
     # We reuse the world of gz_server declared as argument
     # and update it (only use the stem) for gz_spawn_entity
-    world = get_configs('world')
+    world = LaunchConfiguration('world')
     description.add_action(
-        make_opaque_function_that(
-            invoke(
-                SetLaunchConfiguration,
-                'world',
-                invoke(
-                    lambda w: Path(w).stem,
-                    world
-                )
-            )
+        Invoke(
+            lambda v: Path(v).stem,
+            world
+        ).and_then_with_key(
+            'value',
+            SetLaunchConfiguration,
+            name='world'
         )
     )
 

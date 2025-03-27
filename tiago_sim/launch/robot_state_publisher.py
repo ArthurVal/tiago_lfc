@@ -21,12 +21,10 @@ from launch.substitutions import (
 
 from launch_ros.actions import Node
 
-from tiago_sim.opaque_function import (
-    get_configs,
-    invoke,
-    make_opaque_function_that,
+from .invoke import (
+    Invoke,
+    MaybeSubstituable,
 )
-
 from .logging import (
     logger,
 )
@@ -34,22 +32,22 @@ from .logging import (
 
 def run_robot_state_publisher(
         *,
-        robot_description: Optional[Union[Text, LaunchConfiguration]] = None,
-        namespace: Optional[Union[Text, LaunchConfiguration]] = None,
-        use_sim_time: Optional[Union[bool, Text, LaunchConfiguration]] = None,
+        robot_description: Optional[MaybeSubstituable[Text]] = None,
+        namespace: Optional[MaybeSubstituable[Text]] = None,
+        use_sim_time: Optional[Union[bool, MaybeSubstituable[Text]]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Spawn a robot_state_publisher Node.
 
     Parameters
     ----------
-    robot_description: Optional[Union[Text, LaunchConfiguration]]
+    robot_description: Optional[MaybeSubstituable[Text]]
       The robot description used. If not provided, declare a mandatory launch
       argument for it
-    namespace: Optional[Union[Text, LaunchConfiguration]]
+    namespace: Optional[MaybeSubstituable[Text]]
       Namespace of the node. If not provided, declare a launch argument for it
       (default to '')
-    use_sim_time: Optional[Union[Text, LaunchConfiguration]]
+    use_sim_time: Optional[bool | MaybeSubstituable[Text]]
       Indicates if the clock comes from simulation or the normal OS wall clock
     description: LaunchDescription
       Optional LaunchDescription to use. Create a new one by default.
@@ -70,7 +68,8 @@ def run_robot_state_publisher(
         )
     else:
         description.add_action(
-            SetLaunchConfiguration(
+            Invoke(
+                SetLaunchConfiguration,
                 'robot_description',
                 robot_description
             )
@@ -88,8 +87,10 @@ def run_robot_state_publisher(
         )
     else:
         description.add_action(
-            SetLaunchConfiguration(
-                'namespace', namespace
+            Invoke(
+                SetLaunchConfiguration,
+                'namespace',
+                namespace
             )
         )
 
@@ -103,11 +104,12 @@ def run_robot_state_publisher(
         )
     else:
         description.add_action(
-            SetLaunchConfiguration(
+            Invoke(
+                SetLaunchConfiguration,
                 'use_sim_time',
-                use_sim_time
-                if not isinstance(use_sim_time, bool)
-                else str(use_sim_time)
+                str(use_sim_time)
+                if isinstance(use_sim_time, bool)
+                else use_sim_time
             )
         )
 
@@ -131,19 +133,16 @@ def run_robot_state_publisher(
     )
 
     description.add_action(
-        make_opaque_function_that(
-            invoke(
-                logger.info,
-                msg=invoke(
-                    (
-                        'robot_state_publisher spawned with:'
-                        '\n - namespace: "{ns}"'
-                        '\n - use_sim_time: {sim_time}'
-                    ).format,
-                    ns=get_configs('namespace'),
-                    sim_time=get_configs('use_sim_time'),
-                ),
-            )
+        Invoke(
+            (
+                'robot_state_publisher spawned with:'
+                '\n - namespace: "{ns}"'
+                '\n - use_sim_time: {sim_time}'
+            ).format,
+            ns=LaunchConfiguration('namespace'),
+            sim_time=LaunchConfiguration('use_sim_time'),
+        ).and_then(
+            logger.info,
         )
     )
     return description
