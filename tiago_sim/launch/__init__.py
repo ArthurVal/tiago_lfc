@@ -39,7 +39,7 @@ __all__ = [
     'FunctionSubstitution',
     'Invoke',
     'Substituable',
-    'substitute'
+    'substitute',
 
     # logging
     'logger',
