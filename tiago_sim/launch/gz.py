@@ -31,6 +31,7 @@ from launch_ros.actions import (
 
 from .invoke import (
     Invoke,
+    MaybeSubstituable,
     evaluate,
     evaluate_as_dict,
 )
@@ -87,18 +88,18 @@ def __make_sim_cmd(
 
 def gz_server(
         *,
-        world: Optional[Path] = None,
-        gui: Optional[bool] = None,
+        world: Optional[MaybeSubstituable[Path]] = None,
+        gui: Optional[MaybeSubstituable[bool]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Create/update a description to launch a gz sim server.
 
     Parameters
     ----------
-    world: Optional[Path]
+    world: Optional[MaybeSubstituable[Path]]
       If not None, correspond to the sdf file use to spawn the server with.
       When None, declare a LaunchArgument for it (default to 'empty.sdf').
-    gui: Optional[bool]
+    gui: Optional[MaybeSubstituable[bool]]
       If not None, indicates if we wish to spawn the UI or only the server in
       background. When None, declare a LaunchArgument for it (default to True).
     description: Optional[LaunchDescription]
@@ -250,27 +251,27 @@ def __make_spawn_cmd(
 
 def gz_spawn_entity(
         *,
-        model: Optional[Path] = None,
-        name: Optional[Text] = None,
-        world: Optional[Text] = None,
-        timeout_ms: Optional[int] = None,
+        model: Optional[MaybeSubstituable[Path]] = None,
+        name: Optional[MaybeSubstituable[Text]] = None,
+        world: Optional[MaybeSubstituable[Text]] = None,
+        timeout_ms: Optional[MaybeSubstituable[int]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Spawn a model, with a given name, into an already running GZ server.
 
     Parameters
     ----------
-    model: Optional[Union[Path, Text]]
+    model: Optional[MaybeSubstituable[Path]]
       If not None, the model we wish to spawn. It may be either a
       .sdf or .urdf file.
       When None, declare a LaunchArgument for it.
-    name: Optional[Text]
+    name: Optional[MaybeSubstituable[Text]]
       If not None, the name of the entity spawned inside gz.
       When None, declare a LaunchArgument for it (default to 'tiago').
-    world: Optional[Path]
+    world: Optional[MaybeSubstituable[Path]]
       If not None, the GZ world we wish to spawn our model into.
       When None, declare a LaunchArgument for it (default to 'empty').
-    timeout: Optional[int]
+    timeout: Optional[MaybeSubstituable[int]]
       If not None, the timeout in ms associated to the gz service request.
       When None, declare a LaunchArgument for it (default to 1000).
     description: Optional[LaunchDescription]
