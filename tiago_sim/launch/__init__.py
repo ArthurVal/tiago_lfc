@@ -11,7 +11,10 @@ from .gz import (
 from .invoke import (
     FunctionSubstitution,
     Invoke,
+    MaybeSubstituable,
     Substituable,
+    evaluate,
+    evaluate_as_dict,
     substitute,
 )
 from .logging import (
@@ -38,7 +41,10 @@ __all__ = [
     # invoke
     'FunctionSubstitution',
     'Invoke',
+    'MaybeSubstituable',
     'Substituable',
+    'evaluate',
+    'evaluate_as_dict',
     'substitute',
 
     # logging
