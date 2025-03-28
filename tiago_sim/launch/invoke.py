@@ -69,7 +69,8 @@ class Invoke[T](Action, Substitution):
     This is meant to be used as replacement of OpaqueFunction as Action and can
     also be used as a Substitution for any ROS launch related operation.
 
-    It implements the FunctionSubstituion[T] traits.
+    It also implements the FunctionSubstituion[T] traits, therefore calling
+    substitute() on it returns __call__, and not perform.
 
     Any arguments provided that are **not Substituable** will be directly
     forwarded to the function.
@@ -105,7 +106,7 @@ class Invoke[T](Action, Substitution):
 
     def __init__(
             self,
-            f: Callable[..., T],
+            f: Callable[[...], T],
             *args: SubstitutionOr[Any],
             **kwargs: SubstitutionOr[Any],
     ) -> None:
@@ -283,17 +284,17 @@ class Invoke[T](Action, Substitution):
         RuntimeError
           When T != Text (return type of the function f)
         """
-        r = self.__call__(context)
+        value = self.__call__(context)
 
-        if not isinstance(r, Text):
+        if not isinstance(value, Text):
             raise RuntimeError(
                 (
                     'Invoke returned a "{t}" instead of the expected Text '
                     ' when doing .perform() -> Text.'
-                ).format(t=type(r))
+                ).format(t=type(value))
             )
 
-        return r
+        return value
 
     def execute(
             self,
@@ -316,23 +317,23 @@ class Invoke[T](Action, Substitution):
         Optional[List[LaunchDescriptionEntity]]
           The result of calling the action, with arguments evaluated
         """
-        r = self.__call__(context)
+        value = self.__call__(context)
 
-        if isinstance(r, LaunchDescriptionEntity):
-            return [r]
-        elif isinstance(r, list) and all(
+        if isinstance(value, LaunchDescriptionEntity):
+            return [value]
+        elif isinstance(value, list) and all(
                 isinstance(item, LaunchDescriptionEntity)
-                for item in r
+                for item in value
         ):
-            return r
+            return value
         else:
             return None
 
 
 def evaluate(
-        arg: SubstitutionOr[Any],
+        arg: SubstitutionOr[T],
         *others: SubstitutionOr[Any],
-) -> Invoke[Union[Any, List[Any]]]:
+) -> Invoke[Union[T, List[Any]]]:
     """Create an Invoke instance that only evaluate un-named args.
 
     Note
