@@ -3,7 +3,7 @@
 """tiago_sim launch module main entry points."""
 
 from .arguments import (
-    declare_arguments_from_yaml,
+    all_arguments_from_yaml,
 )
 from .gz import (
     gz_server,
@@ -32,7 +32,7 @@ from .utils import (
 
 __all__ = [
     # arguments
-    'declare_arguments_from_yaml',
+    'all_arguments_from_yaml',
 
     # gz
     'gz_server',

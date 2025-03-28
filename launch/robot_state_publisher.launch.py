@@ -8,39 +8,37 @@ from pathlib import (
 
 from ament_index_python.packages import get_package_share_directory
 
+from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
 from tiago_sim.launch import (
     add_robot_description_from_xacro,
-    declare_arguments_from_yaml,
+    all_arguments_from_yaml,
     run_robot_state_publisher,
 )
 
 
 def generate_launch_description():
     """Spawn a robot_state_publisher, using robot_description provided."""
-    # NOTE: We don't use Include... from launch stuff because otherwise
-    # arguments coming from included launch file are not present when doing
-    # `ros2 launch <pkg> <launch> -s` ...
-    description, args_names = declare_arguments_from_yaml(
-        file_path=Path(
-            get_package_share_directory('tiago_description'),
-            'config',
-            'tiago_configuration.yaml',
-        ),
-    )
-
-    # use_sim_time is used in tiago_description but not inside
-    # tiago_configuration.yaml. We add it by hand
-    description.add_action(
+    xacro_args = [
+        # use_sim_time is used in tiago_description but not inside
+        # tiago_configuration.yaml. We add it by hand.
         DeclareLaunchArgument(
             'use_sim_time',
             choices=['True', 'False'],
             default_value='False'
         )
+    ] + list(
+        all_arguments_from_yaml(
+            file_path=Path(
+                get_package_share_directory('tiago_description'),
+                'config',
+                'tiago_configuration.yaml',
+            ),
+        )
     )
-    args_names.append('use_sim_time')
+    description = LaunchDescription(xacro_args)
 
     add_robot_description_from_xacro(
         file_path=Path(
@@ -49,8 +47,7 @@ def generate_launch_description():
             'tiago.urdf.xacro',
         ),
         mappings={
-            names: LaunchConfiguration(names)
-            for names in args_names
+            arg.name: LaunchConfiguration(arg.name) for arg in xacro_args
         },
         description=description,
     )

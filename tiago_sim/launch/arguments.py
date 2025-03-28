@@ -2,30 +2,21 @@
 
 """Provide utils launch function handling DeclareArgument."""
 
+from collections.abc import (
+    Generator,
+)
 from pathlib import (
     Path,
 )
-from typing import (
-    List,
-    Text,
-    Tuple,
-)
 
-from launch import (
-    LaunchDescription,
-)
 from launch.actions import (
     DeclareLaunchArgument,
 )
 
-from .logging import logger
 
-
-def declare_arguments_from_yaml(
+def all_arguments_from_yaml(
         file_path: Path,
-        *,
-        description: LaunchDescription = LaunchDescription(),
-) -> Tuple[LaunchDescription, List[Text]]:
+) -> Generator[DeclareLaunchArgument]:
     """Declare arguments directly imported from a yaml.
 
     Parameters
@@ -42,19 +33,7 @@ def declare_arguments_from_yaml(
       args name added
     """
     from launch_param_builder import load_yaml
-
-    arg_names = []
-
-    logger.debug(
-        'Adding new launch arguments from yaml:\n{path}'.format(
-            path=file_path
-        )
+    return (
+        DeclareLaunchArgument(name, **params)
+        for name, params in load_yaml(file_path).items()
     )
-    for name, params in load_yaml(file_path).items():
-        logger.debug('- {name}'.format(name=name))
-        arg_names.append(name)
-        description.add_action(
-            DeclareLaunchArgument(name, **params)
-        )
-
-    return (description, arg_names)

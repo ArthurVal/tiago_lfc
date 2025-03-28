@@ -7,6 +7,9 @@ from pathlib import (
 
 from ament_index_python.packages import get_package_share_directory
 
+from launch import (
+    LaunchDescription,
+)
 from launch.actions import (
     SetLaunchConfiguration,
 )
@@ -17,7 +20,7 @@ from launch.substitutions import (
 from tiago_sim.launch import (
     Invoke,
     add_robot_description_from_xacro,
-    declare_arguments_from_yaml,
+    all_arguments_from_yaml,
     gz_server,
     gz_spawn_entity,
     run_robot_state_publisher,
@@ -26,21 +29,23 @@ from tiago_sim.launch import (
 
 def generate_launch_description():
     """Launch tiago within GZ."""
-    tiago_xacro_file = Path(
+    xacro_file = Path(
         get_package_share_directory('tiago_description'),
         'robots',
         'tiago.urdf.xacro',
     )
 
-    tiago_xacro_mappgins_yaml_description = Path(
-        get_package_share_directory('tiago_description'),
-        'config',
-        'tiago_configuration.yaml',
+    xacro_args = list(
+        all_arguments_from_yaml(
+            Path(
+                get_package_share_directory('tiago_description'),
+                'config',
+                'tiago_configuration.yaml',
+            )
+        )
     )
 
-    description, xacro_mappings_argument_names = declare_arguments_from_yaml(
-        file_path=tiago_xacro_mappgins_yaml_description,
-    )
+    description = LaunchDescription(xacro_args)
 
     # Since we are simulating, use_sim_time is FORCED here
     description.add_action(
@@ -50,13 +55,8 @@ def generate_launch_description():
         ),
     )
 
-    # 'use_sim_time' it not included in the yaml file but used inside the xacro
-    # as a mapping to select Gazebo stuff...
-    # We add it by hand.
-    xacro_mappings_argument_names.append('use_sim_time')
-
     # FIXME: We shouldn't create a file at this location...
-    tiago_urdf_file = tiago_xacro_file.with_suffix('.urdf')
+    urdf_file = xacro_file.with_suffix('.urdf')
     # Some possible work around TBD:
     # - Create a tmp file ?
     # - Use a fifo (not portable in windows and I don't even know if it works
@@ -66,13 +66,13 @@ def generate_launch_description():
     # - ... ?
 
     add_robot_description_from_xacro(
-        file_path=tiago_xacro_file,
+        file_path=xacro_file,
         mappings={
-            names: LaunchConfiguration(names)
-            for names in xacro_mappings_argument_names
+            arg.name: LaunchConfiguration(arg.name) for arg in xacro_args
+        } | {
+            'use_sim_time': LaunchConfiguration('use_sim_time')
         },
-        # TODO: Remove this
-        output_file=tiago_urdf_file,
+        output_file=urdf_file,
         description=description,
     )
 
@@ -107,7 +107,7 @@ def generate_launch_description():
     )
 
     gz_spawn_entity(
-        model_path=tiago_urdf_file,
+        model_path=urdf_file,
         name='tiago',
         world=world,
         timeout_ms=1000,
