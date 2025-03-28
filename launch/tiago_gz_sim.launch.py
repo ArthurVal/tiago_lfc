@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """Completely launch tiago inside GZ in one go."""
+
 from pathlib import (
     Path,
 )

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Launch file to create an instance of robot_state_publisher for tiago."""
+"""Populate robot_description configuration form tiago's xacro."""
 
 from pathlib import (
     Path,
@@ -8,20 +8,25 @@ from pathlib import (
 
 from ament_index_python.packages import get_package_share_directory
 
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch import (
+    LaunchDescription,
+)
+from launch.actions import (
+    DeclareLaunchArgument,
+)
+from launch.substitutions import (
+    LaunchConfiguration,
+)
 
 from tiago_sim.launch import (
     add_robot_description_from_xacro,
     all_arguments_from_yaml,
     evaluate_dict,
-    run_robot_state_publisher,
 )
 
 
 def generate_launch_description():
-    """Spawn a robot_state_publisher, using robot_description provided."""
+    """Add the robot_description launch configuration using tiago's xacro."""
     xacro_args = [
         # use_sim_time is used in tiago_description but not inside
         # tiago_configuration.yaml. We add it by hand.
@@ -39,9 +44,8 @@ def generate_launch_description():
             ),
         )
     )
-    description = LaunchDescription(xacro_args)
 
-    add_robot_description_from_xacro(
+    return add_robot_description_from_xacro(
         file_path=Path(
             get_package_share_directory('tiago_description'),
             'robots',
@@ -50,12 +54,5 @@ def generate_launch_description():
         mappings=evaluate_dict(
             {arg.name: LaunchConfiguration(arg.name) for arg in xacro_args}
         ),
-        description=description,
+        description=LaunchDescription(xacro_args),
     )
-
-    run_robot_state_publisher(
-        robot_description=LaunchConfiguration('robot_description'),
-        description=description
-    )
-
-    return description
