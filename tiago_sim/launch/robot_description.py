@@ -30,7 +30,7 @@ from launch_param_builder import (
 
 from .invoke import (
     Invoke,
-    MaybeSubstituable,
+    SubstitutionOr,
 )
 from .logging import (
     logger,
@@ -74,9 +74,9 @@ def __load_xacro(file_path: Path, **mappings: [Text]) -> Text:
 
 def add_robot_description_from_xacro(
         *,
-        file_path: Optional[MaybeSubstituable[Path]] = None,
-        mappings: Optional[Mapping[Text, MaybeSubstituable[Text]]] = None,
-        output_file: Optional[MaybeSubstituable[Path]] = None,
+        file_path: Optional[SubstitutionOr[Path]] = None,
+        mappings: Optional[Mapping[Text, SubstitutionOr[Text]]] = None,
+        output_file: Optional[SubstitutionOr[Path]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Create a Configuration with the robot_description from a xacro.

@@ -23,7 +23,7 @@ from launch_ros.actions import Node
 
 from .invoke import (
     Invoke,
-    MaybeSubstituable,
+    SubstitutionOr,
 )
 from .logging import (
     logger,
@@ -32,9 +32,9 @@ from .logging import (
 
 def run_robot_state_publisher(
         *,
-        robot_description: Optional[MaybeSubstituable[Text]] = None,
-        namespace: Optional[MaybeSubstituable[Text]] = None,
-        use_sim_time: Optional[Union[bool, MaybeSubstituable[Text]]] = None,
+        robot_description: Optional[SubstitutionOr[Text]] = None,
+        namespace: Optional[SubstitutionOr[Text]] = None,
+        use_sim_time: Optional[Union[bool, SubstitutionOr[Text]]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Spawn a robot_state_publisher Node.

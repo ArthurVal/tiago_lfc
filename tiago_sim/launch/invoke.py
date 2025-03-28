@@ -35,52 +35,66 @@ class FunctionSubstitution(Protocol[T]):
     def __call__[T](self, context: LaunchContext) -> T: ...
 
 
-Substituable: TypeAlias = Union[
+SubstitutionOr: TypeAlias = Union[
     Substitution,
     FunctionSubstitution[T],
+    T
 ]
-
-MaybeSubstituable: TypeAlias = Union[Substituable[T], T]
 
 
 def substitute(
         context: LaunchContext,
-        value: MaybeSubstituable[T]
-) -> T:
-    """Perform the substitution of the given Substituable, if relevant."""
-    if isinstance(value, Substitution):
-        return value.perform(context)
-    elif isinstance(value, FunctionSubstitution):
+        value: SubstitutionOr[T]
+) -> Union[T, Text]:
+    """Perform the substitution of the given value, if relevant.
+
+    Note
+    ----
+    Dispatch call priority are as follows:
+    1. Function-like API (returns T)
+    2. launch.Substitution.perform() (returns only Text)
+    3. Forward value the value
+    """
+    if isinstance(value, FunctionSubstitution):
         return value(context)
+    elif isinstance(value, Substitution):
+        return value.perform(context)
     else:
         return value
 
 
-class Invoke[T](Action):
+class Invoke[T](Action, Substitution):
     """Invoke the given function with arguments evaluated when needed.
 
-    This is meant to be used as replacement of OpaqueFunction.
+    This is meant to be used as replacement of OpaqueFunction as Action and can
+    also be used as a Substitution for any ROS launch related operation.
+
+    It implements the FunctionSubstituion[T] traits.
 
     Any arguments provided that are **not Substituable** will be directly
     forwarded to the function.
-    Substituable arguments (launch.Substitution or FunctionSubstitution) will
+    Substituable arguments (FunctionSubstituion[T] or launch.Substitution) will
     first be evaluated, given a LaunchContext, and then their values will be
     forwarded to the function call.
 
-    You can obtain the Invoke result through the __call__(LaunchContext) -> T
-    interface.
+    You can obtain the raw Invoke result through the __call__(LaunchContext) ->
+    T interface.
+
     When executing `.execute()` from the launch.Action API, this effectively
-    calls __call__ but filter out the result T if it's not a
-    LaunchDescriptionEntity.
+    calls __call__ but filter out the result T if it's not a list of
+    LaunchDescriptionEntity or a single LaunchDescriptionEntity.
 
-    Additionnally, Invoke provide a 'Chainable-like' interface (`.and_then()`),
-    which enable users to call an other function, with the result of the
-    previously function call.
-    By default, the result of the previous function call will be forwarded as
-    the first unnamed argument to the new function, unless the
-    'forward_previous_result_as' is set to a function keyword
+    When executing `.perform()` from the launch.Substituion API, this
+    effectively calls __call__ but raises an error when the return type is not
+    a Text, as expected by any launch substitution.
 
-    Examples:
+    Additionnally, Invoke provide a 'Chainable-like' interface (`.and_then()`
+    and `.and_then_with_key()`), which enable users to call an other function,
+    with the result of the previously function call, creating a function chain
+    call.
+
+    Examples
+    --------
     - Invoke(foo, 'a', 1).and_then(bar, 'b', 3):
       -> bar(foo('a', 1), 'b', 3)
     - Invoke(foo, 1, toto='a').and_then(bar, 'b', titi=3):
@@ -92,8 +106,8 @@ class Invoke[T](Action):
     def __init__(
             self,
             f: Callable[..., T],
-            *args: MaybeSubstituable[Any],
-            **kwargs: MaybeSubstituable[Any],
+            *args: SubstitutionOr[Any],
+            **kwargs: SubstitutionOr[Any],
     ) -> None:
         """Construct the Invoke action from the given function/args.
 
@@ -106,7 +120,9 @@ class Invoke[T](Action):
         kwargs: MaybeSubstituable[Any]
           Keywords arguments forwarded to the function call, after evaluation
         """
+        # NOTE: Ignore the Action kwargs ?
         super().__init__()
+
         self.__f = f
         self.__args = args
         self.__kwargs = kwargs
@@ -114,8 +130,8 @@ class Invoke[T](Action):
     def and_then(
             self,
             f: Callable[[...], U],
-            *args: MaybeSubstituable[Any],
-            **kwargs: MaybeSubstituable[Any],
+            *args: SubstitutionOr[Any],
+            **kwargs: SubstitutionOr[Any],
     ) -> 'Invoke[U]':
         """Call a new function f with previous results forwared as 1rst arg.
 
@@ -145,8 +161,8 @@ class Invoke[T](Action):
             self,
             key: Text,
             f: Callable[[...], U],
-            *args: MaybeSubstituable[Any],
-            **kwargs: MaybeSubstituable[Any],
+            *args: SubstitutionOr[Any],
+            **kwargs: SubstitutionOr[Any],
     ) -> 'Invoke[U]':
         """Call a new function f with previous call result forwared with a key.
 
@@ -226,6 +242,59 @@ class Invoke[T](Action):
         """Return describe()."""
         return self.describe()
 
+    def __call__(self, context: LaunchContext) -> T:
+        """Perform the postpone args evaluation and function call.
+
+        Parameters
+        ----------
+        context: LaunchContext
+          Launch context use to perform substitution, if relevant
+
+        Returns
+        -------
+        T
+          The result of calling the function, with arguments evaluated
+        """
+        return self.__f(
+            *[substitute(context, arg) for arg in self.__args],
+            **{k: substitute(context, v) for k, v in self.__kwargs.items()}
+        )
+
+    def perform(self, context: LaunchContext) -> Text:
+        """Perform the Substitution given the LaunchContext.
+
+        Note
+        ----
+        Same as calling call except that if the result is not a of type Text
+        (expected by the Substitution API), it raises an exception.
+
+        Parameters
+        ----------
+        context: LaunchContext
+          Launch context use to perform substitution, if relevant
+
+        Returns
+        -------
+        Text
+          The evaluated value
+
+        Raises
+        ------
+        RuntimeError
+          When T != Text (return type of the function f)
+        """
+        r = self.__call__(context)
+
+        if not isinstance(r, Text):
+            raise RuntimeError(
+                (
+                    'Invoke returned a "{t}" instead of the expected Text '
+                    ' when doing .perform() -> Text.'
+                ).format(t=type(r))
+            )
+
+        return r
+
     def execute(
             self,
             context: LaunchContext
@@ -234,8 +303,8 @@ class Invoke[T](Action):
 
         Note
         ----
-        Same a calling __call__ except that the output is filtered to match the
-        expected Action API
+        Same as calling __call__ except that the output is filtered to match
+        the expected Action API
 
         Parameters
         ----------
@@ -259,28 +328,10 @@ class Invoke[T](Action):
         else:
             return None
 
-    def __call__(self, context: LaunchContext) -> T:
-        """Perform the postpone args evaluation and function call.
-
-        Parameters
-        ----------
-        context: LaunchContext
-          Launch context use to perform substitution, if relevant
-
-        Returns
-        -------
-        T
-          The result of calling the function, with arguments evaluated
-        """
-        return self.__f(
-            *[substitute(context, arg) for arg in self.__args],
-            **{k: substitute(context, v) for k, v in self.__kwargs.items()}
-        )
-
 
 def evaluate(
-        arg: MaybeSubstituable[Any],
-        *others: MaybeSubstituable[Any],
+        arg: SubstitutionOr[Any],
+        *others: SubstitutionOr[Any],
 ) -> Invoke[Union[Any, List[Any]]]:
     """Create an Invoke instance that only evaluate un-named args.
 
@@ -308,7 +359,7 @@ def evaluate(
 
 
 def evaluate_as_dict(
-        **kwargs: MaybeSubstituable[Any],
+        **kwargs: SubstitutionOr[Any],
 ) -> Invoke[Dict[Text, Any]]:
     """Create an Invoke instance that only evaluate un-named KEYWORD args.
 

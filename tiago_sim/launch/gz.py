@@ -31,7 +31,7 @@ from launch_ros.actions import (
 
 from .invoke import (
     Invoke,
-    MaybeSubstituable,
+    SubstitutionOr,
     evaluate_as_dict,
 )
 from .logging import (
@@ -87,8 +87,8 @@ def __make_sim_cmd(
 
 def gz_server(
         *,
-        world: Optional[MaybeSubstituable[Path]] = None,
-        gui: Optional[MaybeSubstituable[bool]] = None,
+        world: Optional[SubstitutionOr[Path]] = None,
+        gui: Optional[SubstitutionOr[bool]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Create/update a description to launch a gz sim server.
@@ -249,10 +249,10 @@ def __make_spawn_cmd(
 
 def gz_spawn_entity(
         *,
-        model_path: Optional[MaybeSubstituable[Path]] = None,
-        name: Optional[MaybeSubstituable[Text]] = None,
-        world: Optional[MaybeSubstituable[Text]] = None,
-        timeout_ms: Optional[MaybeSubstituable[int]] = None,
+        model_path: Optional[SubstitutionOr[Path]] = None,
+        name: Optional[SubstitutionOr[Text]] = None,
+        world: Optional[SubstitutionOr[Text]] = None,
+        timeout_ms: Optional[SubstitutionOr[int]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
     """Spawn a model, with a given name, into an already running GZ server.
