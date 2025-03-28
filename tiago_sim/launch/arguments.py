@@ -17,7 +17,7 @@ from launch.actions import (
 def all_arguments_from_yaml(
         file_path: Path,
 ) -> Generator[DeclareLaunchArgument]:
-    """Declare arguments directly imported from a yaml.
+    """Generate declare arguments directly imported from a yaml.
 
     Parameters
     ----------
@@ -28,9 +28,8 @@ def all_arguments_from_yaml(
 
     Returns
     -------
-    Tuple[LaunchDescription, List[Text]]
-      The launch description populated with arguments from yaml and the list of
-      args name added
+    Generator[DeclareLaunchArgument]
+      A generator on DeclareLaunchArguments created from the yaml file
     """
     from launch_param_builder import load_yaml
     return (
