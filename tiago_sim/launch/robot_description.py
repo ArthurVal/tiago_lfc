@@ -9,6 +9,7 @@ from pathlib import (
     Path,
 )
 from typing import (
+    Dict,
     Optional,
     Text,
 )
@@ -40,6 +41,16 @@ from .utils import (
 )
 
 
+def __make_mappings_from_string(txt: Text) -> Dict[Text, Text]:
+    from re import finditer
+
+    mappings = {}
+    for token in finditer(r'(\w+)=(\w+)', txt):
+        mappings[token.group(1)] = token.group(2)
+
+    return mappings
+
+
 def __write_and_forward(
         value: Text,
         *,
@@ -53,7 +64,10 @@ def __write_and_forward(
     return value
 
 
-def __load_xacro(file_path: Path, **mappings: [Text]) -> Text:
+def __load_xacro(
+        file_path: Path,
+        mappings: Optional[Dict[Text, Text]] = None
+) -> Text:
     logger.info(
         (
             'Loading XACRO:'
@@ -75,7 +89,7 @@ def __load_xacro(file_path: Path, **mappings: [Text]) -> Text:
 def add_robot_description_from_xacro(
         *,
         file_path: Optional[SubstitutionOr[Path]] = None,
-        mappings: Optional[Mapping[Text, SubstitutionOr[Text]]] = None,
+        mappings: Optional[SubstitutionOr[Mapping[Text, Text]]] = None,
         output_file: Optional[SubstitutionOr[Path]] = None,
         description: LaunchDescription = LaunchDescription(),
 ) -> LaunchDescription:
@@ -83,14 +97,14 @@ def add_robot_description_from_xacro(
 
     Parameters
     ----------
-    file_path: Optional[MaybeSubstituable[Path]]
+    file_path: Optional[SubstitutionOr[Path]]
       Path to the xacro file. If None, declare a mandatory Launch argument
       for it
-    mappings: Optional[Mapping[Text, MaybeSubstituable[Text]]]
-      Mappings of the XACRO.
+    mappings: Optional[SubstitutionOr[Mapping[Text, Text]]]
+      Mappings of the XACRO. If None, declare a launch argument for it.
     description: LaunchDescription
       If defined, use this description instead of creating a new one
-    output_file: Optional[MaybeSubstituable[Path]]
+    output_file: Optional[SubstitutionOr[Path]]
       If given, will write the content of robot_description to the given file
 
     Returns
@@ -110,9 +124,25 @@ def add_robot_description_from_xacro(
         file_path = LaunchConfiguration('file_path')
 
     if mappings is None:
-        # TODO: mappings string parser from launch argument ?
-        # e.g. mappings:='toto:1, tata:2' -> {'toto': '1', 'tata': '2'}
-        mappings = {}
+        description.add_action(
+            DeclareLaunchArgument(
+                'mappings',
+                description=(
+                    (
+                        'List of "key=value" separated by anythings that is '
+                        'not within [a-zA-Z0-9_]. '
+                        'Example: '
+                        "mappings:='k0=v0 k1=v1 k3 =v3 k4= v4 k5 = v5'"
+                        '-> k/v 3,4 and 5 will be ignored.'
+                     )
+                ),
+                default_value='',
+            )
+        )
+        mappings = Invoke(
+            __make_mappings_from_string,
+            LaunchConfiguration('mappings'),
+        )
 
     if output_file is None:
         description.add_action(
@@ -133,8 +163,8 @@ def add_robot_description_from_xacro(
     description.add_action(
         Invoke(
             __load_xacro,
-            file_path=file_path,
-            **mappings,
+            file_path,
+            mappings,
         ).and_then(
             __write_and_forward,
             file_path=output_file,

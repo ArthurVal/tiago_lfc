@@ -15,6 +15,7 @@ from launch.substitutions import LaunchConfiguration
 from tiago_sim.launch import (
     add_robot_description_from_xacro,
     all_arguments_from_yaml,
+    evaluate_dict,
     run_robot_state_publisher,
 )
 
@@ -46,9 +47,9 @@ def generate_launch_description():
             'robots',
             'tiago.urdf.xacro',
         ),
-        mappings={
-            arg.name: LaunchConfiguration(arg.name) for arg in xacro_args
-        },
+        mappings=evaluate_dict(
+            {arg.name: LaunchConfiguration(arg.name) for arg in xacro_args}
+        ),
         description=description,
     )
 

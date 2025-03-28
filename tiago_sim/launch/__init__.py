@@ -13,8 +13,10 @@ from .invoke import (
     FunctionSubstitution,
     Invoke,
     SubstitutionOr,
-    evaluate,
-    evaluate_as_dict,
+    evaluate_args,
+    evaluate_dict,
+    evaluate_kwargs,
+    evaluate_list,
     substitute,
 )
 from .logging import (
@@ -42,8 +44,10 @@ __all__ = [
     'FunctionSubstitution',
     'Invoke',
     'SubstitutionOr',
-    'evaluate',
-    'evaluate_as_dict',
+    'evaluate_args',
+    'evaluate_dict',
+    'evaluate_kwargs',
+    'evaluate_list',
     'substitute',
 
     # logging

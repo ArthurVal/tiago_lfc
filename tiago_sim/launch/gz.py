@@ -32,7 +32,7 @@ from launch_ros.actions import (
 from .invoke import (
     Invoke,
     SubstitutionOr,
-    evaluate_as_dict,
+    evaluate_dict,
 )
 from .logging import (
     logger,
@@ -186,8 +186,8 @@ def gz_server(
             __make_sim_cmd,
             gui=gui,
             world=world,
-            envs=evaluate_as_dict(
-                **{
+            envs=evaluate_dict(
+                {
                     name: EnvironmentVariable(name)
                     for _, name in all_env_arguments.values()
                 }

@@ -21,6 +21,7 @@ from tiago_sim.launch import (
     Invoke,
     add_robot_description_from_xacro,
     all_arguments_from_yaml,
+    evaluate_dict,
     gz_server,
     gz_spawn_entity,
     run_robot_state_publisher,
@@ -67,11 +68,10 @@ def generate_launch_description():
 
     add_robot_description_from_xacro(
         file_path=xacro_file,
-        mappings={
-            arg.name: LaunchConfiguration(arg.name) for arg in xacro_args
-        } | {
-            'use_sim_time': LaunchConfiguration('use_sim_time')
-        },
+        mappings=evaluate_dict(
+            {arg.name: LaunchConfiguration(arg.name) for arg in xacro_args}
+            | {'use_sim_time': LaunchConfiguration('use_sim_time')}
+        ),
         output_file=urdf_file,
         description=description,
     )

@@ -4,6 +4,7 @@
 
 from collections.abc import (
     Callable,
+    Iterable,
 )
 from typing import (
     Any,
@@ -330,22 +331,22 @@ class Invoke[T](Action, Substitution):
             return None
 
 
-def evaluate(
+def evaluate_args(
         arg: SubstitutionOr[T],
         *others: SubstitutionOr[Any],
 ) -> Invoke[Union[T, List[Any]]]:
-    """Create an Invoke instance that only evaluate un-named args.
+    """Create an Invoke instance that evaluate all args.
 
     Note
     ----
     If only one arg is provided, the result will be this arg
-    evaluated. Otherwise, the result will be a List of args.
+    evaluated. Otherwise, the result will be a List of evaluated args.
 
     Parameters
     ----------
-    arg: MaybeSubstituable[Any]
+    arg: SubstitutionOr[Any]
       A single arg to evaluate
-    others: MaybeSubstituable[Any]
+    others: SubstitutionOr[Any]
       Any other arguments to evaluate
 
     Returns
@@ -354,28 +355,71 @@ def evaluate(
       An Invoke instance that will return the arguments evaluated
     """
     return Invoke(
-        lambda arg, *others:
-        arg if len(others) == 0 else [arg] + others
+        lambda a, *o: a if len(o) == 0 else [a] + o,
+        arg,
+        *others,
     )
 
 
-def evaluate_as_dict(
+def evaluate_kwargs(
         **kwargs: SubstitutionOr[Any],
 ) -> Invoke[Dict[Text, Any]]:
-    """Create an Invoke instance that only evaluate un-named KEYWORD args.
+    """Create an Invoke instance that evaluate the key's values.
 
     Parameters
     ----------
-    kwargs: MaybeSubstituable[Any]
-      Arguments map with value to evaluate
+    kwargs: SubstitutionOr[Any]
+      Keyword arguments with value to evaluate
 
     Returns
     -------
     Invoke[Dict[Text, Any]]
-      An Invoke instance that will return the input dict with all its values
-      evaluated
+      An Invoke instance that will return the kwargs dict with values evaluated
     """
     return Invoke(
         lambda **kwargs: kwargs,
         **kwargs,
+    )
+
+
+def evaluate_list(
+        iterable: Iterable[SubstitutionOr[Any]]
+) -> Invoke[List[Any]]:
+    """Create an Invoke instance that evaluate all values inside l.
+
+    Parameters
+    ----------
+    iterable: Iterable[SubstitutionOr[T]]
+      List of values that needs to be evaluated
+
+    Returns
+    -------
+    Invoke[List[Any]]
+      An Invoke instance that return a list of all values evaluated
+    """
+    return Invoke(lambda *args: args, *iterable)
+
+
+def evaluate_dict(
+        mapping: Dict[SubstitutionOr[Any], SubstitutionOr[Any]],
+) -> Invoke[Dict[Any, Any]]:
+    """Create an Invoke instance that evaluate keys/values of a dict.
+
+    Parameters
+    ----------
+    mapping: Dict[SubstitutionOr[Any], SubstitutionOr[Any]]
+      Arguments map with value to evaluate
+
+    Returns
+    -------
+    Invoke[Dict[Any, Any]]
+      An Invoke instance that will return the input dict with all its keys and
+      values evaluated
+    """
+    return Invoke(
+        lambda x: x,
+        lambda context: {
+            substitute(context, k): substitute(context, v)
+            for k, v in mapping.items()
+        },
     )
