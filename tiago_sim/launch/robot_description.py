@@ -41,17 +41,17 @@ from .utils import (
 )
 
 
-def __make_mappings_from_string(txt: Text) -> Dict[Text, Text]:
+def __make_mappings_from_string(txt: Text) -> Optional[Dict[Text, Text]]:
     from re import finditer
 
     mappings = {}
     for token in finditer(r'(\w+)=(\w+)', txt):
         mappings[token.group(1)] = token.group(2)
 
-    return mappings
+    return mappings if len(mappings) > 0 else None
 
 
-def __write_and_forward(
+def __write_when_required(
         value: Text,
         *,
         file_path: Optional[Path] = None,
@@ -79,7 +79,7 @@ def __load_xacro(
             mappings=dict_to_string(
                 mappings,
                 kv_header='--> ',
-            )
+            ) if mappings is not None else '--> <NONE>'
         )
     )
 
@@ -121,7 +121,10 @@ def add_robot_description_from_xacro(
                 ),
             )
         )
-        file_path = LaunchConfiguration('file_path')
+        file_path = Invoke(
+            Path,
+            LaunchConfiguration('file_path'),
+        )
 
     if mappings is None:
         description.add_action(
@@ -166,7 +169,7 @@ def add_robot_description_from_xacro(
             file_path,
             mappings,
         ).and_then(
-            __write_and_forward,
+            __write_when_required,
             file_path=output_file,
         ).and_then_with_key(
             'value',
