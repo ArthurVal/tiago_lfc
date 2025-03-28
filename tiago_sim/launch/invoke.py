@@ -29,10 +29,9 @@ T = TypeVar('T')
 U = TypeVar('U')
 
 
+# Define the FunctionSubstitution traits (callable on LaunchContext)
 @runtime_checkable
 class FunctionSubstitution(Protocol[T]):
-    """Represents a raw function launch.substitution traits."""
-
     def __call__[T](self, context: LaunchContext) -> T: ...
 
 
@@ -86,7 +85,7 @@ class Invoke[T](Action):
       -> bar(foo('a', 1), 'b', 3)
     - Invoke(foo, 1, toto='a').and_then(bar, 'b', titi=3):
       -> bar(foo(1, toto='a'), 'b', titi=3)
-    - Invoke(foo).and_then(bar, 1, forward_previous_result_as='s'):
+    - Invoke(foo).and_then_with_key('s', bar, 1):
       -> bar(1, s=foo())
     """
 
@@ -154,7 +153,7 @@ class Invoke[T](Action):
         Parameters
         ----------
         key: Text
-          TODO
+          Key used to forward the previous result to in the next function call
         f: Callable[..., T]
           Fun called later on, with arguments evaluated from a LaunchContext
         args: MaybeSubstituable[Any]
@@ -177,27 +176,27 @@ class Invoke[T](Action):
 
     def describe_args(self, *, separator: Text = ', ') -> Text:
         """Create a repr string of the arguments only."""
-        args = separator.join(
+        args_repr = separator.join(
             (
                 repr(arg)
                 for arg in self.__args
             )
         )
 
-        args += separator.join(
+        args_repr += separator.join(
             (
                 '{k}={v}'.format(k=k, v=repr(v))
                 for k, v in self.__kwargs.items()
             )
         )
 
-        return args
+        return args_repr
 
     def describe(
             self,
-            *,
+            *other_args: Any,
             fmt: Text = '{f}({args})',
-            args_separator: Text = ', '
+            **other_kwargs: Any
     ) -> Text:
         """Create a repr of the given invoke, using the provided fmt string.
 
@@ -208,8 +207,10 @@ class Invoke[T](Action):
           The following named format identifier are used:
           - f: Correspond to the repr of the function;
           - args: Correspond to the output of describe_args()
-        args_separator: Text
-          Arguments separator used by describe_args() (default to ', ').
+        other_args: Any
+          Arguments forwarded to describe_args()
+        other_kwargs: Any
+          Keyword arguments forwarded to describe_args()
 
         Returns
         -------
@@ -218,13 +219,11 @@ class Invoke[T](Action):
         """
         return fmt.format(
             f=repr(self.__f),
-            args=self.describe_args(
-                separator=args_separator
-            ),
+            args=self.describe_args(*other_args, *other_kwargs),
         )
 
     def __repr__(self) -> Text:
-        """Return the same as describe()."""
+        """Return describe()."""
         return self.describe()
 
     def execute(
@@ -249,7 +248,16 @@ class Invoke[T](Action):
           The result of calling the action, with arguments evaluated
         """
         r = self.__call__(context)
-        return [r] if isinstance(r, LaunchDescriptionEntity) else None
+
+        if isinstance(r, LaunchDescriptionEntity):
+            return [r]
+        elif isinstance(r, list) and all(
+                isinstance(item, LaunchDescriptionEntity)
+                for item in r
+        ):
+            return r
+        else:
+            return None
 
     def __call__(self, context: LaunchContext) -> T:
         """Perform the postpone args evaluation and function call.
@@ -274,24 +282,47 @@ def evaluate(
         arg: MaybeSubstituable[Any],
         *others: MaybeSubstituable[Any],
 ) -> Invoke[Union[Any, List[Any]]]:
-    """TODO."""
-    if len(others) == 0:
-        return Invoke(
-            lambda x: x,
-            arg,
-        )
-    else:
-        return Invoke(
-            lambda *all_args: all_args,
-            arg,
-            *others,
-        )
+    """Create an Invoke instance that only evaluate un-named args.
+
+    Note
+    ----
+    If only one arg is provided, the result will be this arg
+    evaluated. Otherwise, the result will be a List of args.
+
+    Parameters
+    ----------
+    arg: MaybeSubstituable[Any]
+      A single arg to evaluate
+    others: MaybeSubstituable[Any]
+      Any other arguments to evaluate
+
+    Returns
+    -------
+    Invoke[Union[Any, List[Any]]]
+      An Invoke instance that will return the arguments evaluated
+    """
+    return Invoke(
+        lambda arg, *others:
+        arg if len(others) == 0 else [arg] + others
+    )
 
 
 def evaluate_as_dict(
         **kwargs: MaybeSubstituable[Any],
 ) -> Invoke[Dict[Text, Any]]:
-    """TODO."""
+    """Create an Invoke instance that only evaluate un-named KEYWORD args.
+
+    Parameters
+    ----------
+    kwargs: MaybeSubstituable[Any]
+      Arguments map with value to evaluate
+
+    Returns
+    -------
+    Invoke[Dict[Text, Any]]
+      An Invoke instance that will return the input dict with all its values
+      evaluated
+    """
     return Invoke(
         lambda **kwargs: kwargs,
         **kwargs,

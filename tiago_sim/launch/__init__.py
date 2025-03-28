@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """tiago_sim launch module main entry points."""
+
 from .arguments import (
     declare_arguments_from_yaml,
 )
