@@ -87,8 +87,7 @@ def add_robot_description_from_xacro(
       Path to the xacro file. If None, declare a mandatory Launch argument
       for it
     mappings: Optional[Mapping[Text, MaybeSubstituable[Text]]]
-      Mappings of the XACRO. If None, declare a launch argument for it
-      (default = {})
+      Mappings of the XACRO.
     description: LaunchDescription
       If defined, use this description instead of creating a new one
     output_file: Optional[MaybeSubstituable[Path]]
@@ -111,13 +110,9 @@ def add_robot_description_from_xacro(
         file_path = LaunchConfiguration('file_path')
 
     if mappings is None:
-        raise NotImplementedError(
-            (
-                'TODO: Need to implement a launch argument parser to transform'
-                ' a string to a dict OR a way to introspect xacro arguments'
-                ' a posteriori'
-            )
-        )
+        # TODO: mappings string parser from launch argument ?
+        # e.g. mappings:='toto:1, tata:2' -> {'toto': '1', 'tata': '2'}
+        mappings = {}
 
     if output_file is None:
         description.add_action(
