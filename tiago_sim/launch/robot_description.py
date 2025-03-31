@@ -164,18 +164,17 @@ def add_robot_description_from_xacro(
         )
 
     description.add_action(
-        Invoke(
-            __load_xacro,
-            file_path,
-            mappings,
-        ).and_then(
-            __write_when_required,
-            file_path=output_file,
-        ).and_then_with_key(
-            'value',
-            SetLaunchConfiguration,
+        SetLaunchConfiguration(
             name='robot_description',
-        )
+            value=Invoke(
+                __load_xacro,
+                file_path,
+                mappings,
+            ).and_then(
+                __write_when_required,
+                file_path=output_file,
+            )
+        ),
     )
 
     return description
