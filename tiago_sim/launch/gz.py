@@ -95,10 +95,10 @@ def gz_server(
 
     Parameters
     ----------
-    world: Optional[MaybeSubstituable[Path]]
+    world: Optional[SubstitutionOr[Path]]
       If not None, correspond to the sdf file use to spawn the server with.
       When None, declare a LaunchArgument for it (default to 'empty.sdf').
-    gui: Optional[MaybeSubstituable[bool]]
+    gui: Optional[SubstitutionOr[bool]]
       If not None, indicates if we wish to spawn the UI or only the server in
       background. When None, declare a LaunchArgument for it (default to True).
     description: Optional[LaunchDescription]
@@ -259,17 +259,17 @@ def gz_spawn_entity(
 
     Parameters
     ----------
-    model_path: Optional[MaybeSubstituable[Path]]
+    model_path: Optional[SubstitutionOr[Path]]
       If not None, the model we wish to spawn. It may be either a
       .sdf or .urdf file.
       When None, declare a LaunchArgument for it.
-    name: Optional[MaybeSubstituable[Text]]
+    name: Optional[SubstitutionOr[Text]]
       If not None, the name of the entity spawned inside gz.
       When None, declare a LaunchArgument for it (default to 'tiago').
-    world: Optional[MaybeSubstituable[Path]]
+    world: Optional[SubstitutionOr[Path]]
       If not None, the GZ world we wish to spawn our model into.
       When None, declare a LaunchArgument for it (default to 'empty').
-    timeout: Optional[MaybeSubstituable[int]]
+    timeout: Optional[SubstitutionOr[int]]
       If not None, the timeout in ms associated to the gz service request.
       When None, declare a LaunchArgument for it (default to 1000).
     description: Optional[LaunchDescription]
@@ -278,7 +278,7 @@ def gz_spawn_entity(
     Returns
     -------
     LaunchDescription
-      The launch description with that spanw the model into a gz server
+      The launch description that spawn the model into a gz server
     """
     if model_path is None:
         description.add_action(
@@ -289,7 +289,6 @@ def gz_spawn_entity(
                     'Expecting either an sdf or urdf file path (checking '
                     'files extensions).'
                 ),
-                # default_value=LaunchConfiguration('model_path'),
             )
         )
         model_path = Invoke(

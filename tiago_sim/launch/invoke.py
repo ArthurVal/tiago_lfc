@@ -117,9 +117,9 @@ class Invoke[T](Action, Substitution):
         ----------
         f: Callable[..., T]
           Fun called later on, with arguments evaluated from a LaunchContext
-        args: MaybeSubstituable[Any]
+        args: SubstitutionOr[Any]
           Arguments forwarded to the function call, after evaluation
-        kwargs: MaybeSubstituable[Any]
+        kwargs: SubstitutionOr[Any]
           Keywords arguments forwarded to the function call, after evaluation
         """
         # NOTE: Ignore the Action kwargs ?
@@ -141,9 +141,9 @@ class Invoke[T](Action, Substitution):
         ----------
         f: Callable[..., T]
           Fun called later on, with arguments evaluated from a LaunchContext
-        args: MaybeSubstituable[Any]
+        args: SubstitutionOr[Any]
           Arguments forwarded to the function call, after evaluation
-        kwargs: MaybeSubstituable[Any]
+        kwargs: SubstitutionOr[Any]
           Keywords arguments forwarded to the function call, after evaluation
 
         Returns
@@ -174,9 +174,9 @@ class Invoke[T](Action, Substitution):
           Key used to forward the previous result to in the next function call
         f: Callable[..., T]
           Fun called later on, with arguments evaluated from a LaunchContext
-        args: MaybeSubstituable[Any]
+        args: SubstitutionOr[Any]
           Arguments forwarded to the function call, after evaluation
-        kwargs: MaybeSubstituable[Any]
+        kwargs: SubstitutionOr[Any]
           Keywords arguments forwarded to the function call, after evaluation
 
         Returns

@@ -41,13 +41,13 @@ def run_robot_state_publisher(
 
     Parameters
     ----------
-    robot_description: Optional[MaybeSubstituable[Text]]
+    robot_description: Optional[SubstitutionOr[Text]]
       The robot description used. If not provided, declare a mandatory launch
       argument for it
-    namespace: Optional[MaybeSubstituable[Text]]
+    namespace: Optional[SubstitutionOr[Text]]
       Namespace of the node. If not provided, declare a launch argument for it
       (default to '')
-    use_sim_time: Optional[bool | MaybeSubstituable[Text]]
+    use_sim_time: Optional[bool | SubstitutionOr[Text]]
       Indicates if the clock comes from simulation or the normal OS wall clock
     description: LaunchDescription
       Optional LaunchDescription to use. Create a new one by default.
