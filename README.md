@@ -42,7 +42,9 @@ tiago_sim_ws
 6 directories, 6 files
 ```
 
-### Dependencies - `tiago_description`
+### Dependencies
+
+#### `tiago_description`
 
 If the `tiago_description` dependency is not installed on your system (required
 to get the tiago's xacro/urdf model description), you can fetch them inside your
@@ -73,7 +75,7 @@ git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 vcs . < tiago_sim/dependencies.repos
 ```
 
-### Dependencies - `linear_feedback_controller`
+#### `linear_feedback_controller`
 
 TODO
 
@@ -144,7 +146,7 @@ TODO
 
 TODO
 
-## Tips
+## Common Issues
 
 ### Robot's model is incomplete
 
@@ -164,15 +166,17 @@ can simply set the above mentionned variable the `<WORKSPACE>/src` (e.g. :
 `resource_path:=$(pwd)/src` when running `ros2 launch` command from within the
 `<WORKSPACE>`).
 
-### Controller's not running
+### ros2_control's `/controller_manager` is not running
 
-When launching the simulation, you should logs coming from `[gz_ros_control]`
-about the ros2_control facility listing all hardware interfaces.
+When launching the simulation, `ros2 node list` doesn't show the `/controller_manger`, it means that gazebo failed to launch the `ros2_control` plugin.
+
+You can easily confirm that the plugin is launched by looking at the logs coming
+from `[gz_ros_control]` listing all hardware interfaces.
 
 <details>
 <summary>
 
-Log example
+Example
 
 </summary>
 
@@ -319,17 +323,19 @@ Log example
 
 
 If this is not the case, the following error message should've appeared:
+
 ```sh
 ...
 [gz-2] [Err] [SystemLoader.cc:92] Failed to load system plugin [libgz_ros2_control-system.so] : Could not find shared library.`
 ...
 ```
 
-This GZ plugin is, most of the time, installed directly within the
-`/opt/ros/<DISTRO>/lib` directory, but, for some unknown reasons, GZ doesn't
-automatically add this path to the plugin look path.
+This GZ plugin (`libgz_ros2_control-system.so`) is, most of the time, installed
+directly within the `/opt/ros/<DISTRO>/lib` directory, but, for some unknown
+reasons, GZ doesn't automatically add this path to the plugin lookup path.
 
-To fix this, you can either:
-  - `GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib` (before launching the GZ server, this is permanent);
+To fix this, you can either (replace `<DISTRO>` with `jazzy`, `rolling`, ...,
+your current ROS distro):
+  - `export GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib`;
   - `GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib; ros2 launch tiago_sim [LAUNCH FILE]`;
   - `ros2 launch tiago_sim [LAUNCH FILE] system_plugin_path:=/opt/ros/<DISTRO>/lib'`;
