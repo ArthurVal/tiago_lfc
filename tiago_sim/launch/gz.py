@@ -59,9 +59,9 @@ def __make_sim_cmd(
     logger.info(
         (
             'Creating GZ sim server using:'
-            '\n- With gui ?: {gui}'
+            '\n- Gui: {gui}'
             '\n- World: {world}'
-            '\n- With env:'
+            '\n- Envs:'
             '\n{envs}'
         ).format(
             gui=gui,
