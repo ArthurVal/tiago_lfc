@@ -1,0 +1,11 @@
+joint_state_broadcaster:
+  ros__parameters:
+    # extra_joints: '{}'
+    # interfaces: '{}'
+    # joints: '{}'
+    map_interface_to_joint_state:
+      position: position
+      velocity: velocity
+      effort: effort
+    use_local_topics: false
+    use_urdf_to_filter: true
