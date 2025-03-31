@@ -68,7 +68,7 @@ def __make_sim_cmd(
             world=world,
             envs=dict_to_string(
                 envs,
-                kv_header='--> ',
+                fmt='--> {k}: {v}',
             ),
         )
     )

@@ -78,7 +78,7 @@ def __load_xacro(
             file_path=file_path,
             mappings=dict_to_string(
                 mappings,
-                kv_header='--> ',
+                fmt='--> {k}: {v}',
             ) if mappings is not None else '--> <NONE>'
         )
     )
