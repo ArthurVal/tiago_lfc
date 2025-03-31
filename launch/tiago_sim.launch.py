@@ -97,13 +97,12 @@ def generate_launch_description():
 
     # This remove the file extension from 'world'
     description.add_action(
-        Invoke(
-            lambda v: Path(v).stem,
-            world
-        ).and_then_with_key(
-            'value',
-            SetLaunchConfiguration,
-            name='world'
+        SetLaunchConfiguration(
+            'world',
+            Invoke(
+                lambda v: Path(v).stem,
+                world
+            )
         )
     )
 
