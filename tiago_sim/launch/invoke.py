@@ -45,7 +45,7 @@ SubstitutionOr: TypeAlias = Union[
 
 def substitute(
         context: LaunchContext,
-        value: SubstitutionOr[T]
+        obj: SubstitutionOr[T]
 ) -> Union[T, Text]:
     """Perform the substitution of the given value, if relevant.
 
@@ -56,12 +56,12 @@ def substitute(
     2. launch.Substitution.perform() (returns only Text)
     3. Forward value the value
     """
-    if isinstance(value, FunctionSubstitution):
-        return value(context)
-    elif isinstance(value, Substitution):
-        return value.perform(context)
+    if isinstance(obj, FunctionSubstitution):
+        return obj(context)
+    elif isinstance(obj, Substitution):
+        return obj.perform(context)
     else:
-        return value
+        return obj
 
 
 class Invoke[T](Action, Substitution):
