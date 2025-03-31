@@ -1,4 +1,7 @@
-# tiago_sim
+# `tiago_sim`
+
+This small package contains ROS2 launch utils tools to ease the deployment of
+tiago robot inside gazebo.
 
 TODO
 
@@ -50,6 +53,9 @@ Inside `<WORKSPACE>/src` you can either:
 - Fetch the 'lightweight' version of the dependencies, containing only
   `*_description` folders:
 
+> [!note]
+> TODO: Find a way to simplify this...
+
 ```sh
 wget -O - https://github.com/Tiago-Harmonic/tiago_robot/archive/jazzy.tar.gz | tar -xz --strip=1 tiago_robot-jazzy/tiago_description
 wget -O - https://github.com/Tiago-Harmonic/omni_base_robot/archive/jazzy.tar.gz | tar -xz --strip=1 omni_base_robot-jazzy/omni_base_description
@@ -77,7 +83,7 @@ vcs . < tiago_sim/dependencies_lfc.repos
 
 ### Build
 
-TODO
+You can simply build this using `colcon`:
 
 ```sh
 source /opt/ros/<DISTRO>/setup.zsh
@@ -91,14 +97,34 @@ source install/local_setup.zsh
 TODO
 
 ```sh
-ros2 launch tiago_sim tiago_sim.launch.py [...]
+ros2 launch tiago_sim tiago_sim.launch.py resource_path:=$(pwd)/src system_plugin_path:=/opt/ros/jazzy/lib
 ```
+
+>>> [!tip]
+You can always access the full list of arguments of ANY launch file using `-s` option:
 
 ```sh
 ros2 launch tiago_sim tiago_sim.launch.py -s
 ```
+>>>
 
 ### Launch files
+
+This package provides several launch files that can either be used *_with or
+without_* `tiago_description` and its dependencies.
+
+All launch file starting with the `tiago_` prefix use ament lookup functions to
+retreive tiago's XACRO from the `tiago_description` package.
+
+#### `tiago_robot_description.launch.py`
+
+TODO
+
+#### `tiago_robot_state_publisher.launch.py`
+
+TODO
+
+#### `tiago_sim.launch.py`
 
 TODO
 
@@ -115,17 +141,5 @@ TODO
 TODO
 
 #### `robot_state_publisher_from_xacro.launch.py`
-
-TODO
-
-#### `tiago_robot_description.launch.py`
-
-TODO
-
-#### `tiago_robot_state_publisher.launch.py`
-
-TODO
-
-#### `tiago_sim.launch.py`
 
 TODO
