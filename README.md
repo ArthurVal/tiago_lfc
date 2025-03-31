@@ -166,8 +166,15 @@ can simply set the above mentionned variable the `<WORKSPACE>/src` (e.g. :
 
 ### Controller's not running
 
-When launching the simulation, you should see the following logs coming from
-`[gz_ros_control]` about the ros2_control facility listing all hardware interfaces:
+When launching the simulation, you should logs coming from `[gz_ros_control]`
+about the ros2_control facility listing all hardware interfaces.
+
+<details>
+<summary>
+
+Log example
+
+</summary>
 
 ```sh
 ...
@@ -307,6 +314,9 @@ When launching the simulation, you should see the following logs coming from
 [gz-2] [INFO] [1743405688.416591884] [controller_manager]: Resource Manager has been successfully initialized. Starting Controller Manager services...
 ...
 ```
+
+</details>
+
 
 If this is not the case, the following error message should've appeared:
 ```sh
