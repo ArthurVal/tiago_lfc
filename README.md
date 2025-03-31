@@ -41,16 +41,16 @@ tiago_sim_ws
 
 ### Dependencies - `tiago_description`
 
-If the `tiago_description` dependency is not install, you canf fetch them inside
-your workspace following theses instructions.
+If the `tiago_description` dependency is not installed on your system (required
+to get the tiago's xacro/urdf model description), you can fetch them inside your
+workspace following theses instructions.
 
-From `<WORKSPACE>/src` you can either:
+Inside `<WORKSPACE>/src` you can either:
 
 - Fetch the 'lightweight' version of the dependencies, containing only
-  `*_description` folders from the github repos:
+  `*_description` folders:
 
 ```sh
-cd <WORKSPACE>/src
 wget -O - https://github.com/Tiago-Harmonic/tiago_robot/archive/jazzy.tar.gz | tar -xz --strip=1 tiago_robot-jazzy/tiago_description
 wget -O - https://github.com/Tiago-Harmonic/omni_base_robot/archive/jazzy.tar.gz | tar -xz --strip=1 omni_base_robot-jazzy/omni_base_description
 wget -O - https://github.com/Tiago-Harmonic/pmb2_robot/archive/jazzy.tar.gz | tar -xz --strip=1 pmb2_robot-jazzy/pmb2_description
@@ -66,3 +66,66 @@ git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 ```sh
 vcs . < tiago_sim/dependencies.repos
 ```
+
+### Dependencies - `linear_feedback_controller`
+
+TODO
+
+```sh
+vcs . < tiago_sim/dependencies_lfc.repos
+```
+
+### Build
+
+TODO
+
+```sh
+source /opt/ros/<DISTRO>/setup.zsh
+cd <WORKSPACE>
+colcon build --symlink-install
+source install/local_setup.zsh
+```
+
+## Usage
+
+TODO
+
+```sh
+ros2 launch tiago_sim tiago_sim.launch.py [...]
+```
+
+```sh
+ros2 launch tiago_sim tiago_sim.launch.py -s
+```
+
+### Launch files
+
+TODO
+
+#### `gz_server.launch.py`
+
+TODO
+
+#### `gz_spawn.launch.py`
+
+TODO
+
+#### `robot_description_from_xacro.launch.py`
+
+TODO
+
+#### `robot_state_publisher_from_xacro.launch.py`
+
+TODO
+
+#### `tiago_robot_description.launch.py`
+
+TODO
+
+#### `tiago_robot_state_publisher.launch.py`
+
+TODO
+
+#### `tiago_sim.launch.py`
+
+TODO
