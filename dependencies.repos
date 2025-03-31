@@ -3,6 +3,10 @@ repositories:
     type: git
     url: https://github.com/Tiago-Harmonic/launch_pal.git
     version: master
+  pal_urdf_utils:
+    type: git
+    url: https://github.com/Tiago-Harmonic/pal_urdf_utils.git
+    version: jazzy
   pal_gripper:
     type: git
     url: https://github.com/Tiago-Harmonic/pal_gripper.git
@@ -14,10 +18,6 @@ repositories:
   pal_robotiq_gripper:
     type: git
     url: https://github.com/Tiago-Harmonic/pal_robotiq_gripper.git
-    version: jazzy
-  pal_urdf_utils:
-    type: git
-    url: https://github.com/Tiago-Harmonic/pal_urdf_utils.git
     version: jazzy
   pmb2_robot:
     type: git
@@ -31,11 +31,3 @@ repositories:
     type: git
     url: https://github.com/Tiago-Harmonic/tiago_robot.git
     version: jazzy
-  linear_feedback_controller_msgs:
-    type: git
-    url: https://github.com/loco-3d/linear-feedback-controller-msgs.git
-    version: jazzy
-  linear_feedback_controller:
-    type: git
-    url: https://github.com/loco-3d/linear-feedback-controller.git
-    version: jazzy-devel
