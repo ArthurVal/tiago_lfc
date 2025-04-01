@@ -178,7 +178,9 @@ can simply set the above mentionned variable the `<WORKSPACE>/src` (e.g. :
 
 ### ros2_control's `/controller_manager` is not running
 
-When launching the simulation, `ros2 node list` doesn't show the `/controller_manger`, it means that gazebo failed to launch the `ros2_control` plugin.
+If, after launching the simulation, `ros2 node list` doesn't show the
+`/controller_manger`, it means that gazebo failed to launch the `ros2_control`
+plugin.
 
 You can easily confirm that the plugin is launched by looking at the logs coming
 from `[gz_ros_control]` listing all hardware interfaces.
@@ -331,7 +333,6 @@ Example
 
 </details>
 
-
 If this is not the case, the following error message should've appeared:
 
 ```sh
@@ -342,10 +343,13 @@ If this is not the case, the following error message should've appeared:
 
 This GZ plugin (`libgz_ros2_control-system.so`) is, most of the time, installed
 directly within the `/opt/ros/<DISTRO>/lib` directory, but, for some unknown
-reasons, GZ doesn't automatically add this path to the plugin lookup path.
+reasons, GZ doesn't automatically add this path to the system plugin lookup
+path....
 
 To fix this, you can either (replace `<DISTRO>` with `jazzy`, `rolling`, ...,
 your current ROS distro):
-  - `export GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib`;
-  - `GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib; ros2 launch tiago_sim [LAUNCH FILE]`;
-  - `ros2 launch tiago_sim [LAUNCH FILE] system_plugin_path:=/opt/ros/<DISTRO>/lib'`;
+  - `export GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib` then call `ros2 launch tiago_sim ...`
+  - Call ros2 launch using `GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib;
+    ros2 launch tiago_sim ...`;
+  - Call taigo_sim launch files using `ros2 launch tiago_sim
+    ... system_plugin_path:=/opt/ros/<DISTRO>/lib'`;
