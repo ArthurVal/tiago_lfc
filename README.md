@@ -59,7 +59,7 @@ folders use to build up tiago's urdf.
 
 > [!important]
 > The following commands expect you to be inside `<WORKSPACE>/src`
-> (i.e. always do `cd <WORKSPACE>/src` beforehands)
+> (i.e. `cd <WORKSPACE>/src` beforehands)
 
 ```sh
 wget -O - https://github.com/Tiago-Harmonic/tiago_robot/archive/jazzy.tar.gz | tar -xz --strip=1 tiago_robot-jazzy/tiago_description
@@ -78,8 +78,8 @@ Theses dependencies includes the full `*_robot` github repos, the required
 `*_description` and more.
 
 > [!important]
-> The following commands expect you to be inside `<WORKSPACE>/src`
-> (i.e. always do `cd <WORKSPACE>/src` beforehands)
+> The following command expect you to be inside `<WORKSPACE>/src`
+> (i.e. `cd <WORKSPACE>/src` beforehands)
 
 ```sh
 vcs . < tiago_sim/dependencies.repos
@@ -88,8 +88,8 @@ vcs . < tiago_sim/dependencies.repos
 #### `linear_feedback_controller`
 
 > [!important]
-> The following commands expect you to be inside `<WORKSPACE>/src`
-> (i.e. always do `cd <WORKSPACE>/src` beforehands)
+> The following command expect you to be inside `<WORKSPACE>/src`
+> (i.e. `cd <WORKSPACE>/src` beforehands)
 
 ```sh
 vcs . < tiago_sim/dependencies_lfc.repos
