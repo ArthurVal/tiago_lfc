@@ -47,15 +47,7 @@ tiago_sim_ws
 
 If the `tiago_description` dependency is not installed on your system (required
 to get the tiago's xacro/urdf model description), you can fetch them inside your
-workspace with the following instructions.
-
-##### Lightweight (`*_description`)
-
-The following commands fetch only the necessary the required `*_description`
-package use to build up tiago's urdf.
-
-> [!note]
-> TODO: Find a way to simplify this...
+workspace by doing the following:
 
 > [!important]
 > The following commands expect you to be inside `<WORKSPACE>/src`
@@ -72,18 +64,14 @@ git clone https://github.com/Tiago-Harmonic/launch_pal.git
 git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 ```
 
-##### Full (`*_robot`)
 
-The following command fetch the dependencies that include the full `*_robot`
-github repos, containing the required `*_description` and more.
+> [!note]
+> Currently this fetches **ONLY** the strict minimum dependencies required to
+> make `tiago_sim` work. If needed, you can fetch the full set of dependencies
+> using `vcs . < tiago_sim/dependencies.repos` instead.
 
-> [!important]
-> The following command expect you to be inside `<WORKSPACE>/src`
-> (i.e. `cd <WORKSPACE>/src` beforehands)
-
-```sh
-vcs . < tiago_sim/dependencies.repos
-```
+> [!note]
+> TODO: Find a way to simplify this ?
 
 #### `linear_feedback_controller`
 
