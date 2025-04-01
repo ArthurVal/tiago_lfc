@@ -43,12 +43,6 @@ tiago_sim_ws
 
 ### Dependencies
 
-> [!important]
-> The following part indicates how to fetch dependencies inside your source
-> folder (`<WORKSPACE>/src`).
-> All the commands listed below expect you to be inside `<WORKSPACE>/src`
-> (i.e. always do `cd <WORKSPACE>/src` beforehands)
-
 #### `tiago_description`
 
 If the `tiago_description` dependency is not installed on your system (required
@@ -62,6 +56,10 @@ folders use to build up tiago's urdf.
 
 > [!note]
 > TODO: Find a way to simplify this...
+
+> [!important]
+> The following commands expect you to be inside `<WORKSPACE>/src`
+> (i.e. always do `cd <WORKSPACE>/src` beforehands)
 
 ```sh
 wget -O - https://github.com/Tiago-Harmonic/tiago_robot/archive/jazzy.tar.gz | tar -xz --strip=1 tiago_robot-jazzy/tiago_description
@@ -79,13 +77,19 @@ git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 Theses dependencies includes the full `*_robot` github repos, the required
 `*_description` and more.
 
+> [!important]
+> The following commands expect you to be inside `<WORKSPACE>/src`
+> (i.e. always do `cd <WORKSPACE>/src` beforehands)
+
 ```sh
 vcs . < tiago_sim/dependencies.repos
 ```
 
 #### `linear_feedback_controller`
 
-TODO
+> [!important]
+> The following commands expect you to be inside `<WORKSPACE>/src`
+> (i.e. always do `cd <WORKSPACE>/src` beforehands)
 
 ```sh
 vcs . < tiago_sim/dependencies_lfc.repos
