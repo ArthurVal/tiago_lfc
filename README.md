@@ -46,9 +46,10 @@ tiago_sim_ws
 ### Dependencies
 
 > [!important]
-> The following part indicates how to fetch dependencies inside you source
-> directory (`<WORKSPACE>/src`). All the commands listed below expect you to be
-> inside `<WORKSPACE>/src` (i.e. always do `cd <WORKSPACE>/src` beforehands)
+> The following part indicates how to fetch dependencies inside your source
+> folder (`<WORKSPACE>/src`).
+> All the commands listed below expect you to be inside `<WORKSPACE>/src`
+> (i.e. always do `cd <WORKSPACE>/src` beforehands)
 
 #### `tiago_description`
 
