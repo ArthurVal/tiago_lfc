@@ -9,13 +9,14 @@ TODO
 
 ### Setup
 
-Following the classical ROS2 workflow, create a `<WORKSPACE>` accordingly:
+Following the classical ROS2 workflow, create a `<WORKSPACE>` with a `src`
+folder accordingly:
 
 ```sh
 mkdir -p <WORKSPACE>/src
 ```
 
-The clone this repo inside the source folder
+Then clone this repo inside the source folder
 
 ```sh
 cd <WORKSPACE>/src
@@ -44,16 +45,21 @@ tiago_sim_ws
 
 ### Dependencies
 
+> [!important]
+> The following part indicates how to fetch dependencies inside you source
+> directory (`<WORKSPACE>/src`). All the commands listed below expect you to be
+> inside `<WORKSPACE>/src` (i.e. always do `cd <WORKSPACE>/src` beforehands)
+
 #### `tiago_description`
 
 If the `tiago_description` dependency is not installed on your system (required
 to get the tiago's xacro/urdf model description), you can fetch them inside your
-workspace following theses instructions.
+workspace with the following instructions.
 
-Inside `<WORKSPACE>/src` you can either:
+##### Lightweight (`*_description`)
 
-- Fetch the 'lightweight' version of the dependencies, containing only
-  `*_description` folders:
+Theses 'lightweight' dependencies contains only the required `*_description`
+folders use to build up tiago's urdf.
 
 > [!note]
 > TODO: Find a way to simplify this...
@@ -69,7 +75,10 @@ git clone https://github.com/Tiago-Harmonic/launch_pal.git
 git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 ```
 
-- Get the full dependencies from github repos using:
+##### Full (`*_robots`)
+
+Theses dependencies includes the full `*_robots` github repos, the required
+`*_description` and more.
 
 ```sh
 vcs . < tiago_sim/dependencies.repos
@@ -85,7 +94,7 @@ vcs . < tiago_sim/dependencies_lfc.repos
 
 ### Build
 
-You can simply build using `colcon`:
+Build using `colcon`:
 
 ```sh
 source /opt/ros/<DISTRO>/setup.zsh
