@@ -156,6 +156,15 @@ TODO
 
 TODO
 
+
+### `tiago_sim.launch` package
+
+TODO
+
+#### `Invoke`
+
+TODO
+
 ## Common Issues
 
 ### Robot's model is incomplete
@@ -349,9 +358,8 @@ path....
 To fix this, you can either (replace `<DISTRO>` with `jazzy`, `rolling`, ...,
 your current ROS distro):
   - Setup the env variable `export
-    GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib` then call `ros2 launch
-    tiago_sim ...`
+    GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib` then call `ros2 launch ...`
   - Call ros2 launch using `GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib;
-    ros2 launch tiago_sim ...`;
-  - Call tiago_sim launch files using `ros2 launch tiago_sim
-    ... system_plugin_path:=/opt/ros/<DISTRO>/lib'`;
+    ros2 launch ...`;
+  - Call tiago_sim launch files using `ros2 launch
+    ... system_plugin_path:=/opt/ros/<DISTRO>/lib`;
