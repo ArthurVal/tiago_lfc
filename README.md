@@ -3,8 +3,6 @@
 This small package contains ROS2 launch utils tools to ease the deployment of
 tiago robot inside gazebo.
 
-[[_TOC_]]
-
 ## Install
 
 ### Setup
@@ -112,13 +110,9 @@ TODO
 ros2 launch tiago_sim tiago_sim.launch.py resource_path:=$(pwd)/src system_plugin_path:=/opt/ros/jazzy/lib
 ```
 
->>> [!tip]
-You can always access the full list of arguments of ANY launch file using `-s` option:
-
-```sh
-ros2 launch tiago_sim tiago_sim.launch.py -s
-```
->>>
+> [!tip]
+> You can always access the full list of arguments of ANY launch file using `-s`
+> option: `ros2 launch tiago_sim tiago_sim.launch.py -s`
 
 ### Launch files
 
