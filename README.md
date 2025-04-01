@@ -111,8 +111,7 @@ ros2 launch tiago_sim tiago_sim.launch.py resource_path:=$(pwd)/src system_plugi
 ```
 
 > [!tip]
-> You can always access the full list of arguments of ANY launch file using `-s`
-> option: `ros2 launch tiago_sim tiago_sim.launch.py -s`
+> Use `-s` (`ros2 launch tiago_sim tiago_sim.launch.py -s`) to access the arguments list
 
 ### Launch files
 
