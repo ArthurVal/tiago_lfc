@@ -76,9 +76,9 @@ git clone https://github.com/Tiago-Harmonic/launch_pal.git
 git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 ```
 
-##### Full (`*_robots`)
+##### Full (`*_robot`)
 
-Theses dependencies includes the full `*_robots` github repos, the required
+Theses dependencies includes the full `*_robot` github repos, the required
 `*_description` and more.
 
 ```sh
