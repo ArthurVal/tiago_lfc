@@ -193,9 +193,7 @@ from `[gz_ros_control]` listing all hardware interfaces.
 
 <details>
 <summary>
-
 Example
-
 </summary>
 
 ```sh
