@@ -170,10 +170,10 @@ to gazebo the location of 3D models defined wihtin the URDF.
 
 To fix this, you can either:
   - `export GZ_SIM_RESOURCE_PATH=<PATH>:<PATH>:<PATH>` (before launching the GZ server, this is permanent);
-  - `GZ_SIM_RESOURCE_PATH=<PATH>:<PATH>:<PATH>; ros2 launch tiago_sim [LAUNCH FILE]`;
-  - `ros2 launch tiago_sim [LAUNCH FILE] resource_path:='<PATH>:<PATH>:<PATH>...'`;
+  - `GZ_SIM_RESOURCE_PATH=<PATH>:<PATH>:<PATH>; ros2 launch ...`;
+  - `ros2 launch tiago_sim ... resource_path:='<PATH>:<PATH>:<PATH>...'`;
 
-When using having only the `*_descption` package inside `<WORKSPACE>/src`, you
+When using having only the `*_description` package inside `<WORKSPACE>/src`, you
 can simply set the above mentionned variable the `<WORKSPACE>/src` (e.g. :
 `resource_path:=$(pwd)/src` when running `ros2 launch` command from within the
 `<WORKSPACE>`).
