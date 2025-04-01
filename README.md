@@ -20,7 +20,7 @@ Then clone this repo inside the source folder
 
 ```sh
 cd <WORKSPACE>/src
-git clone git clone https://gitlab.laas.fr/avaliente/tiago_sim.git
+git clone https://gitlab.laas.fr/avaliente/tiago_sim.git
 ```
 
 The workspace should look something like this (named `tiago_sim_ws` in this example):
