@@ -51,8 +51,8 @@ workspace with the following instructions.
 
 ##### Lightweight (`*_description`)
 
-Theses 'lightweight' dependencies contains only the required `*_description`
-folders use to build up tiago's urdf.
+The following commands fetch only the necessary the required `*_description`
+package use to build up tiago's urdf.
 
 > [!note]
 > TODO: Find a way to simplify this...
@@ -74,8 +74,8 @@ git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 
 ##### Full (`*_robot`)
 
-Theses dependencies includes the full `*_robot` github repos, the required
-`*_description` and more.
+The following command fetch the dependencies that include the full `*_robot`
+github repos, containing the required `*_description` and more.
 
 > [!important]
 > The following command expect you to be inside `<WORKSPACE>/src`
