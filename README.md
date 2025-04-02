@@ -73,7 +73,9 @@ git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 > [!note]
 > TODO: Find a way to simplify this ?
 
-#### `linear_feedback_controller`
+#### Optional: `linear_feedback_controller`
+
+If you also want to include the `LFC` inside this workspace:
 
 > [!important]
 > The following command expect you to be inside `<WORKSPACE>/src`
