@@ -111,7 +111,7 @@ This package provides several launch files can be simply used through:<br/>
 > Use `-s` (`ros2 launch tiago_sim tiago_sim.launch.py -s`) to access the full
 > list of arguments
 
-* Generics launch files (i.e. doesn't depends on Tiago at all):
+* Generic launch files (doesn't depends on Tiago at all):
 
 | **Launch file**                              | **Description**                                                                              |
 |----------------------------------------------|----------------------------------------------------------------------------------------------|
@@ -120,18 +120,18 @@ This package provides several launch files can be simply used through:<br/>
 | `gz_server.launch.py`                        | Launch any GZ server                                                                         |
 | `gz_spawn.launch.py`                         | Spawn any GZ model inside any GZ world                                                       |
 
-* Tiago's specific launch files (i.e. use hard coded `tiago_description` xacro's location):
-
-> [!note]
-> The files used from `tiago_description` are: <br/>
-> - `tiago_description/robots/tiago.urdf.xacro`;<br/>
-> - `tiago_description/config/tiago_configuration.yaml`;
+* Tiago's specific launch files (use hard path to `tiago_description` xacro's location):
 
 | **Launch file**                         | **Description**                                           |
 |-----------------------------------------|-----------------------------------------------------------|
 | `tiago_robot_description.launch.py`     | Create Tiago's `robot_description`                        |
 | `tiago_robot_state_publisher.launch.py` | Start Tiago's `robot_state_publisher`                     |
 | `tiago_sim.launch.py`                   | Launch everything needed at once to spawn Tiago inside GZ |
+
+> [!note]
+> The files used from `tiago_description` are: <br/>
+> - `tiago_description/robots/tiago.urdf.xacro`;<br/>
+> - `tiago_description/config/tiago_configuration.yaml`;
 
 ## Common Issues
 
