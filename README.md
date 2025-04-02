@@ -85,7 +85,7 @@ vcs . < tiago_sim/dependencies_lfc.repos
 
 ### Build
 
-Build using `colcon`:
+Using `colcon`:
 
 ```sh
 source /opt/ros/<DISTRO>/setup.zsh
@@ -96,22 +96,19 @@ source install/local_setup.zsh
 
 ## Usage
 
-TODO
+### TLDR
 
 ```sh
 ros2 launch tiago_sim tiago_sim.launch.py
 ```
 
-> [!tip]
-> Use `-s` (`ros2 launch tiago_sim tiago_sim.launch.py -s`) to access the list of arguments
-
 ### Launch files
 
-This package provides several launch files that can either be used **with or
-without** `tiago_description` and its dependencies.
+This package provides several launch files can be simply used through:<br/>
+`ros2 launch tiago_sim <LAUNCH FILE> [ARGS...]` .
 
-All launch file starting with the `tiago_` prefix use ament lookup functions to
-retreive tiago's XACRO from the `tiago_description` package.
+> [!tip]
+> Use `-s` (`ros2 launch tiago_sim tiago_sim.launch.py -s`) to access the list of arguments
 
 * Generics launch files (i.e. doesn't depends on Tiago at all):
 
@@ -122,7 +119,12 @@ retreive tiago's XACRO from the `tiago_description` package.
 | `gz_server.launch.py`                        | Launch any GZ server                                                                         |
 | `gz_spawn.launch.py`                         | Spawn any GZ model inside any GZ world                                                       |
 
-* Tiago's specific launch files (i.e. use hard coded `tiago_description` xacro location):
+* Tiago's specific launch files (i.e. use hard coded `tiago_description` xacro's location):
+
+> [!note]
+> The files used from `tiago_description` are: <br/>
+> - `tiago_description/robots/tiago.urdf.xacro`;<br/>
+> - `tiago_description/config/tiago_configuration.yaml`;
 
 | **Launch file**                         | **Description**                                           |
 |-----------------------------------------|-----------------------------------------------------------|
