@@ -68,7 +68,7 @@ git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 > [!note]
 > Currently this fetches **ONLY** the strict minimum dependencies required to
 > make `tiago_sim` work. If needed, you can fetch the full set of dependencies
-> using `vcs . < tiago_sim/dependencies.repos` instead.
+> using `vcs import . < tiago_sim/dependencies.repos` instead.
 
 > [!note]
 > TODO: Find a way to simplify this ?
@@ -80,7 +80,7 @@ git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 > (i.e. `cd <WORKSPACE>/src` beforehands)
 
 ```sh
-vcs . < tiago_sim/dependencies_lfc.repos
+vcs import . < tiago_sim/dependencies_lfc.repos
 ```
 
 ### Build
@@ -108,7 +108,8 @@ This package provides several launch files can be simply used through:<br/>
 `ros2 launch tiago_sim <LAUNCH FILE> [ARGS...]` .
 
 > [!tip]
-> Use `-s` (`ros2 launch tiago_sim tiago_sim.launch.py -s`) to access the list of arguments
+> Use `-s` (`ros2 launch tiago_sim tiago_sim.launch.py -s`) to access the full
+> list of arguments
 
 * Generics launch files (i.e. doesn't depends on Tiago at all):
 
