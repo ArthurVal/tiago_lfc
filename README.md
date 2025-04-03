@@ -88,6 +88,10 @@ cd <WORKSPACE>
 colcon build --symlink-install --cmake-args -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release
 ```
 
+> [!tip]
+> Don't forget to source the global ROS setup file before building:<br>
+> `source /opt/ros/<DISTRO>/setup.<EXTENSION>`
+
 ## Usage
 
 ### TLDR
