@@ -9,7 +9,7 @@ inside Tiago, using ROS jazzy and Gazebo Harmonic.
 ### Setup
 
 Following the classical ROS2 workflow, create a colcon `<WORKSPACE>` with a
-`src` folder (set `<WORKSPACE>` accordingly to your need):
+`src` folder (set `<WORKSPACE>` accordingly):
 
 ```sh
 WS=<WORKSPACE>; mkdir -p ${WS}/src && cd ${WS}/src
