@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 """Completely launch tiago inside GZ in one go."""
-
+from itertools import (
+    chain,
+)
 from pathlib import (
     Path,
 )
@@ -68,21 +70,26 @@ def generate_launch_description():
     # - Find out how to forward a valid value using 'sdf' param instead of
     #   'sdf_filename' in gz service /world/create (EntityFactory msg) ?
     # - ... ?
-    for action in add_robot_description_from_xacro(
-            file_path=xacro_file,
-            mappings=evaluate_dict(
-                {arg.name: LaunchConfiguration(arg.name) for arg in xacro_args}
-                | {'use_sim_time': LaunchConfiguration('use_sim_time')}
+    for action in chain(
+            add_robot_description_from_xacro(
+                file_path=xacro_file,
+                mappings=evaluate_dict(
+                    {
+                        arg.name: LaunchConfiguration(arg.name)
+                        for arg in xacro_args
+                    } | {
+                        'use_sim_time': LaunchConfiguration('use_sim_time')
+                    }
+                ),
+                output_file=urdf_file,
             ),
-            output_file=urdf_file,
+            run_robot_state_publisher(
+                robot_description=LaunchConfiguration('robot_description'),
+                use_sim_time=LaunchConfiguration('use_sim_time'),
+
+            ),
     ):
         description.add_action(action)
-
-    run_robot_state_publisher(
-        robot_description=LaunchConfiguration('robot_description'),
-        use_sim_time=LaunchConfiguration('use_sim_time'),
-        description=description
-    )
 
     gz_server(
         description=description,

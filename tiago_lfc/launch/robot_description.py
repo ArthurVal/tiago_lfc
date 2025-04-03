@@ -3,6 +3,7 @@
 """Provide utils function to populate decription with robot_description."""
 
 from collections.abc import (
+    Generator,
     Mapping,
 )
 from pathlib import (
@@ -10,7 +11,6 @@ from pathlib import (
 )
 from typing import (
     Dict,
-    List,
     Optional,
     Text,
 )
@@ -92,7 +92,7 @@ def add_robot_description_from_xacro(
         file_path: Optional[SubstitutionOr[Path]] = None,
         mappings: Optional[SubstitutionOr[Mapping[Text, Text]]] = None,
         output_file: Optional[SubstitutionOr[Path]] = None,
-) -> List[Action]:
+) -> Generator[Action]:
     """Create a Configuration with the robot_description from a xacro.
 
     Parameters
@@ -107,74 +107,65 @@ def add_robot_description_from_xacro(
 
     Returns
     -------
-    List[Action]
+    Generator[Action]
       All ROS launch Actions used to perform the needed task.
     """
-    actions = []
-
     if file_path is None:
-        actions.append(
-            DeclareLaunchArgument(
-                'file_path',
-                description=(
-                    'XACRO file path use to create the robot_description URDF'
-                ),
-            )
+        yield DeclareLaunchArgument(
+            'file_path',
+            description=(
+                'XACRO file path use to create the robot_description URDF'
+            ),
         )
+
         file_path = Invoke(
             Path,
             LaunchConfiguration('file_path'),
         )
 
     if mappings is None:
-        actions.append(
-            DeclareLaunchArgument(
-                'mappings',
-                description=(
-                    (
-                        'List of "key=value" separated by anythings that is '
-                        'not within [a-zA-Z0-9_]. '
-                        'Example: '
-                        "mappings:='k0=v0 k1=v1 k3 =v3 k4= v4 k5 = v5'"
-                        '-> k/v 3,4 and 5 will be ignored.'
-                     )
-                ),
-                default_value='',
-            )
+        yield DeclareLaunchArgument(
+            'mappings',
+            description=(
+                (
+                    'List of "key=value" separated by anythings that is '
+                    'not within [a-zA-Z0-9_]. '
+                    'Example: '
+                    "mappings:='k0=v0 k1=v1 k3 =v3 k4= v4 k5 = v5'"
+                    '-> k/v 3,4 and 5 will be ignored.'
+                )
+            ),
+            default_value='',
         )
+
         mappings = Invoke(
             __make_mappings_from_string,
             LaunchConfiguration('mappings'),
         )
 
     if output_file is None:
-        actions.append(
-            DeclareLaunchArgument(
-                'output_file',
-                description=(
-                    'If not empty, a valid file name (will be created) used to'
-                    ' write the robot_description into'
-                ),
-                default_value='',
-            )
+        yield DeclareLaunchArgument(
+            'output_file',
+            description=(
+                'If not empty, a valid file name (will be created) used to'
+                ' write the robot_description into'
+            ),
+            default_value='',
         )
+
         output_file = Invoke(
             lambda txt: None if txt == '' else Path(txt),
             LaunchConfiguration('output_file'),
         )
 
-    actions.append(
-        SetLaunchConfiguration(
-            name='robot_description',
-            value=Invoke(
-                __load_xacro,
-                file_path,
-                mappings,
-            ).and_then(
-                __write_when_required,
-                file_path=output_file,
-            )
-        ),
+    yield SetLaunchConfiguration(
+        name='robot_description',
+        value=Invoke(
+            __load_xacro,
+            file_path,
+            mappings,
+        ).and_then(
+            __write_when_required,
+            file_path=output_file,
+        )
     )
-
-    return actions

@@ -1,16 +1,24 @@
 #!/usr/bin/env python
 
 """Create an instance of robot_state_publisher from tiago's xacro."""
-
+from itertools import (
+    chain,
+)
 from pathlib import (
     Path,
 )
 
 from ament_index_python.packages import get_package_share_directory
 
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch import (
+    LaunchDescription,
+)
+from launch.actions import (
+    DeclareLaunchArgument,
+)
+from launch.substitutions import (
+    LaunchConfiguration,
+)
 
 from tiago_lfc.launch import (
     add_robot_description_from_xacro,
@@ -39,26 +47,25 @@ def generate_launch_description():
             ),
         )
     )
-    description = LaunchDescription(
-        xacro_args +
-        add_robot_description_from_xacro(
-                file_path=Path(
-                    get_package_share_directory('tiago_description'),
-                    'robots',
-                    'tiago.urdf.xacro',
-                ),
-                mappings=evaluate_dict(
-                    {
-                        arg.name: LaunchConfiguration(arg.name)
-                        for arg in xacro_args
-                    }
-                ),
-        )
+
+    robot_description = add_robot_description_from_xacro(
+        file_path=Path(
+            get_package_share_directory('tiago_description'),
+            'robots',
+            'tiago.urdf.xacro',
+        ),
+        mappings=evaluate_dict(
+            {
+                arg.name: LaunchConfiguration(arg.name)
+                for arg in xacro_args
+            }
+        ),
     )
 
-    run_robot_state_publisher(
+    robot_state_publisher = run_robot_state_publisher(
         robot_description=LaunchConfiguration('robot_description'),
-        description=description
     )
 
-    return description
+    return LaunchDescription(
+        chain(xacro_args, robot_description, robot_state_publisher)
+    )
