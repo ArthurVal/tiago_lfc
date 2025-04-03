@@ -25,6 +25,7 @@ from tiago_lfc.launch import (
     evaluate_dict,
     gz_server,
     gz_spawn_entity,
+    load_controllers,
     run_robot_state_publisher,
 )
 
@@ -111,6 +112,17 @@ def generate_launch_description():
         name='tiago',
         world=world,
         timeout_ms=1000,
+        description=description,
+    )
+
+    load_controllers(
+        controllers=('lfc', 'jse'),
+        param_file=Path(
+            get_package_share_directory('tiago_lfc'),
+            'config',
+            'lfc_parameters.yaml',
+        ),
+        activate=False,
         description=description,
     )
 
