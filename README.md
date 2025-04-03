@@ -109,7 +109,8 @@ This package provides several launch files can be simply used through:<br/>
 |----------------------------------------------|----------------------------------------------------------------------------------------------|
 | `robot_description_from_xacro.launch.py`     | Create any `robot_description` from xacro file (mappings can be specified through arguments) |
 | `robot_state_publisher_from_xacro.launch.py` | Create `robot_description` (same as above) and start the `robot_state_publisher` associated  |
-| `load_controllers.launch.py`                 | Launch ROS2 control controllers.                                                             |
+| `load_controllers.launch.py`                 | Load ROS2 control controllers.                                                               |
+| `switch_controllers.launch.py`               | Activate/Deactivate controllers.                                                             |
 | `gz_server.launch.py`                        | Launch any GZ server                                                                         |
 | `gz_spawn.launch.py`                         | Spawn any GZ model inside any GZ world                                                       |
 

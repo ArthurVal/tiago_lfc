@@ -27,6 +27,7 @@ from tiago_lfc.launch import (
     gz_spawn_entity,
     load_controllers,
     run_robot_state_publisher,
+    switch_controllers,
 )
 
 
@@ -123,6 +124,14 @@ def generate_launch_description():
             'lfc_parameters.yaml',
         ),
         activate=False,
+        controller_manager='/controller_manager',
+        description=description,
+    )
+
+    switch_controllers(
+        controllers=('lfc', 'jse'),
+        activate=True,
+        controller_manager='/controller_manager',
         description=description,
     )
 

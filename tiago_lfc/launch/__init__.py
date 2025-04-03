@@ -30,6 +30,7 @@ from .robot_state_publisher import (
 )
 from .ros2_control import (
     load_controllers,
+    switch_controllers,
 )
 from .utils import (
     dict_to_string,
@@ -64,6 +65,7 @@ __all__ = [
 
     # ros2_control
     'load_controllers',
+    'switch_controllers',
 
     # utils
     'dict_to_string',

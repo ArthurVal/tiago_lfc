@@ -18,6 +18,7 @@ from launch import (
 )
 from launch.actions import (
     DeclareLaunchArgument,
+    ExecuteProcess,
 )
 from launch.substitutions import (
     LaunchConfiguration,
@@ -102,7 +103,8 @@ def load_controllers(
     Returns
     -------
     LaunchDescription
-      The launch description with that launch the gz sim server accordingly
+      The launch description filled with the action needed to perform this
+      function.
     """
     if controllers is None:
         description.add_action(
@@ -194,4 +196,132 @@ def load_controllers(
             '`ros2 controll unload_controller <NAME>`'
         )
     )
+    return description
+
+
+def __make_switch_controllers_cmd(
+        controllers: Iterable[Text],
+        activate: bool,
+        controller_manager: Optional[Text] = None,
+) -> List[Text]:
+    cmd = [
+        'ros2',
+        'control',
+        'switch_controllers',
+        '--activate' if activate else '--deactivate',
+    ]
+
+    for name in controllers:
+        cmd.append(name)
+
+    logger.info(
+        '{} controllers: {}...'.format(
+            'Activating' if activate else 'Deactivating',
+            ' '.join(cmd[3:])
+        )
+    )
+
+    if controller_manager is not None:
+        logger.info('Targeting controller_manager \"{}\"', controller_manager)
+        cmd += [
+            '-c',
+            controller_manager,
+        ]
+
+    logger.debug('Command sent: {}'.format(cmd))
+    return cmd
+
+
+def switch_controllers(
+        *,
+        controllers: Optional[SubstitutionOr[Iterable[Text]]] = None,
+        activate: Optional[SubstitutionOr[bool]] = None,
+        controller_manager: Optional[SubstitutionOr[Text]] = None,
+        description: LaunchDescription = LaunchDescription(),
+) -> LaunchDescription:
+    """Activate/Deactivate controllers.
+
+    Parameters
+    ----------
+    controllers: Optional[SubstitutionOr[Iterable[Text]]]
+        Mandatory list of controllers name we wish to activate/deactivate. If
+        None, declare a launch argument for it.
+    activate: Optional[SubstitutionOr[bool]]
+        True if you wish to activate the controllers, False to deactivate
+        them. If None, declare a launch argument for it.
+    controller_manager: Optional[SubstitutionOr[Text]]
+        Name of the controller manager containing the controllers. If None,
+        declare a launch argument for it (default to '/controller_manager').
+    description: Optional[LaunchDescription]
+      LaunchDescription to use instead of creating a new one
+
+    Returns
+    -------
+    LaunchDescription
+      The launch description filled with the action needed to perform this
+      function.
+    """
+    if controllers is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'controllers',
+                description=(
+                    'List of whitespace separated of name(s) corresponding to '
+                    'the controller(s) we wish to activate/deactivate'
+                ),
+            )
+        )
+        controllers = Invoke(
+            lambda txt: txt.split(' '),
+            LaunchConfiguration('controllers'),
+        )
+
+    if activate is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'activate',
+                description=(
+                    (
+                        'True if you wish to activate the controllers, False '
+                        'to deactivate them'
+                     )
+                ),
+                choices=['False', 'True']
+            )
+        )
+        activate = Invoke(
+            lambda txt: True if txt == 'True' else False,
+            LaunchConfiguration('activate'),
+        )
+
+    if controller_manager is None:
+        description.add_action(
+            DeclareLaunchArgument(
+                'controller_manager',
+                description=(
+                    (
+                        'Name of the controller manager containing the '
+                        'controllers listed'
+                     )
+                ),
+                default_value='',
+            )
+        )
+        controller_manager = Invoke(
+            lambda txt: txt if txt != '' else None,
+            LaunchConfiguration('controller_manager'),
+        )
+
+    description.add_action(
+        Invoke(
+            __make_switch_controllers_cmd,
+            controllers=controllers,
+            activate=activate,
+            controller_manager=controller_manager,
+        ).and_then_with_key(
+            'cmd',
+            ExecuteProcess,
+        )
+    )
+
     return description
