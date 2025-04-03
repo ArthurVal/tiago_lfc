@@ -81,13 +81,15 @@ cd <WORKSPACE>
 colcon build --symlink-install --cmake-args -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release
 ```
 
-> [!tip]
-> Don't forget to source the local setup file afterwards.<br>
-> `source <WORKSPACE>/install/local_setup.<EXTENSION>`
 
 ## Usage
 
 ### TLDR
+
+> [!tip]
+> Don't forget to source the local setup file at least once after building
+> it.<br>
+> `source <WORKSPACE>/install/local_setup.<EXTENSION>`
 
 ```sh
 ros2 launch tiago_lfc gz_tiago_lfc.launch.py
@@ -96,11 +98,11 @@ ros2 launch tiago_lfc gz_tiago_lfc.launch.py
 ### Launch files
 
 This package provides several launch files can be simply used through:<br/>
-`ros2 launch tiago_lfc <LAUNCH FILE> [ARGS...]` .
+`ros2 launch tiago_lfc <FILE> [ARGS...]` .
 
 > [!tip]
-> Use `-s` (`ros2 launch tiago_lfc <LAUNCH FILE> -s`) to access the full
-> list of arguments
+> Use `-s` (`ros2 launch tiago_lfc <FILE> -s`) to access the full list of
+> arguments
 
 * Generic launch files (doesn't depends on Tiago at all):
 
@@ -120,7 +122,7 @@ This package provides several launch files can be simply used through:<br/>
 | `gz_tiago_lfc.launch.py`                | Launch everything needed at once to spawn Tiago inside GZ |
 
 > [!note]
-> The files used from `tiago_description` are: <br/>
+> The files used/required from `tiago_description` are: <br/>
 > - `tiago_description/robots/tiago.urdf.xacro`;<br/>
 > - `tiago_description/config/tiago_configuration.yaml`;
 
@@ -147,7 +149,7 @@ To fix this, you can either:
 ### [GZ] ros2_control's `/controller_manager` is not running
 
 If, after launching the simulation, `ros2 node list` doesn't show the
-`/controller_manger`, and launching the tiago's simulation shows the following
+`/controller_manger` and launching the tiago's simulation shows the following
 log:
 
 ```sh
@@ -162,13 +164,28 @@ It means that gazebo failed to launch the `ros2_control` plugin.
 > You can easily confirm that the plugin is launched by looking at the logs coming
 > from `[gz_ros_control]` listing all hardware interfaces.
 
-The `libgz_ros2_control-system.so` plugin comes automatically when installing
-Gazebo through `ros-<DISTRO>-gz-ros2-control` and is installed directly within
-the `/opt/ros/<DISTRO>/lib` directory, but, for some unknown reasons, GZ doesn't
-automatically add this path to the system plugin lookup path...
+You can check for the plugin's availability/location on your system using:
 
-To fix this, you can either (replace `<DISTRO>` with `jazzy`, `rolling`, ...,
-your current ROS distro):
+```sh
+$ dpkg -S libgz_ros2_control
+ros-jazzy-gz-ros2-control: /opt/ros/jazzy/lib/libgz_ros2_control-system.so
+```
+
+> [!note]
+>  If the above command returned:<br>
+> `dpkg-query: no path found matching pattern`<br>
+> It means that `gz-ros2-control` is not installed.<br>
+> You can install it through: `apt install ros-<DISTRO>-gz-ros2-control`
+
+Then, you have to tell GZ the `libgz_ros2_control-system.so` dir path (for some
+reasons GZ doesn't automatically add this path to the system plugin lookup path)
+by either:
 - Update `GZ_SIM_SYSTEM_PLUGIN_PATH` environment variable accordingly (`export
-  GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib`);
-- Use `system_plugin_path:=/opt/ros/<DISTRO>/lib` launch argument;
+  GZ_SIM_SYSTEM_PLUGIN_PATH=/path/to/dir`);
+- Use `system_plugin_path:=/path/to/dir` launch argument;
+
+> [!tip]
+> You can use the following to automatically get the dir location:<br>
+> `dpkg -S libgz_ros2_control | awk '{ print $2 }' | xargs dirname`<br>
+> And do the following one liner:<br>
+> `export GZ_SIM_SYSTEM_PLUGIN_PATH=$(dpkg -S libgz_ros2_control | awk '{ print $2 }' | xargs dirname)`
