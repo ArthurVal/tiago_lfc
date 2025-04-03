@@ -2,6 +2,7 @@
 
 """Add utils launch function managing GZ stuff."""
 from collections.abc import (
+    Generator,
     Mapping,
 )
 from pathlib import (
@@ -13,7 +14,7 @@ from typing import (
 )
 
 from launch import (
-    LaunchDescription,
+    Action,
 )
 from launch.actions import (
     AppendEnvironmentVariable,
@@ -89,8 +90,7 @@ def gz_server(
         *,
         world: Optional[SubstitutionOr[Path]] = None,
         gui: Optional[SubstitutionOr[bool]] = None,
-        description: LaunchDescription = LaunchDescription(),
-) -> LaunchDescription:
+) -> Generator[Action]:
     """Create/update a description to launch a gz sim server.
 
     Parameters
@@ -106,30 +106,26 @@ def gz_server(
 
     Returns
     -------
-    LaunchDescription
-      The launch description with that launch the gz sim server accordingly
+    Generator[Action]
+      All ROS launch Actions used to perform the needed task.
     """
     if world is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'world',
-                description='sdf file of the world we wish to create',
-                default_value='empty.sdf'
-            )
+        yield DeclareLaunchArgument(
+            'world',
+            description='sdf file of the world we wish to create',
+            default_value='empty.sdf'
         )
         world = LaunchConfiguration('world')
 
     if gui is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'gui',
-                description=(
-                    'Set to false if you wish to disable the GUI and only '
-                    'launch the server in background'
-                ),
-                default_value='True',
-                choices=['False', 'True'],
-            )
+        yield DeclareLaunchArgument(
+            'gui',
+            description=(
+                'Set to false if you wish to disable the GUI and only '
+                'launch the server in background'
+            ),
+            default_value='True',
+            choices=['False', 'True'],
         )
         gui = Invoke(
             lambda txt: True if txt == 'True' else False,
@@ -161,56 +157,46 @@ def gz_server(
 
     for arg_name, details in all_env_arguments.items():
         descr, env_var = details
-        description.add_action(
-            DeclareLaunchArgument(
-                arg_name,
-                description=(
-                    'Contains paths to {descr}. Will be appended to {env_var}.'
-                ).format(
-                    descr=descr,
-                    env_var=env_var,
-                ),
-                default_value='',
-            )
-        )
-
-        description.add_action(
-            AppendEnvironmentVariable(
-                env_var,
-                LaunchConfiguration(arg_name),
-            )
-        )
-
-    description.add_action(
-        Invoke(
-            __make_sim_cmd,
-            gui=gui,
-            world=world,
-            envs=evaluate_dict(
-                {
-                    name: EnvironmentVariable(name)
-                    for _, name in all_env_arguments.values()
-                }
+        yield DeclareLaunchArgument(
+            arg_name,
+            description=(
+                'Contains paths to {descr}. Will be appended to {env_var}.'
+            ).format(
+                descr=descr,
+                env_var=env_var,
             ),
-        ).and_then(
-            __log_then_forward_cmd,
-        ).and_then_with_key(
-            'cmd',
-            ExecuteProcess
+            default_value='',
         )
+
+        yield AppendEnvironmentVariable(
+            env_var,
+            LaunchConfiguration(arg_name),
+        )
+
+    yield Invoke(
+        __make_sim_cmd,
+        gui=gui,
+        world=world,
+        envs=evaluate_dict(
+            {
+                name: EnvironmentVariable(name)
+                for _, name in all_env_arguments.values()
+            }
+        ),
+    ).and_then(
+        __log_then_forward_cmd,
+    ).and_then_with_key(
+        'cmd',
+        ExecuteProcess
     )
 
     # # FIXME: Is this needed ?
-    description.add_action(
-        Node(
-            package='ros_gz_bridge',
-            executable='parameter_bridge',
-            arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
-            output='screen'
-        )
+    yield Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        output='screen'
     )
-
-    return description
 
 
 def __make_spawn_cmd(
@@ -253,8 +239,7 @@ def gz_spawn_entity(
         name: Optional[SubstitutionOr[Text]] = None,
         world: Optional[SubstitutionOr[Text]] = None,
         timeout_ms: Optional[SubstitutionOr[int]] = None,
-        description: LaunchDescription = LaunchDescription(),
-) -> LaunchDescription:
+) -> Generator[Action]:
     """Spawn a model, with a given name, into an already running GZ server.
 
     Parameters
@@ -272,24 +257,20 @@ def gz_spawn_entity(
     timeout: Optional[SubstitutionOr[int]]
       If not None, the timeout in ms associated to the gz service request.
       When None, declare a LaunchArgument for it (default to 1000).
-    description: Optional[LaunchDescription]
-      LaunchDescription to use instead of creating a new one
 
     Returns
     -------
-    LaunchDescription
-      The launch description that spawn the model into a gz server
+    Generator[Action]
+      All ROS launch Actions used to perform the needed task.
     """
     if model_path is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'model_path',
-                description=(
-                    'The model file to spawn. '
-                    'Expecting either an sdf or urdf file path (checking '
-                    'files extensions).'
-                ),
-            )
+        yield DeclareLaunchArgument(
+            'model_path',
+            description=(
+                'The model file to spawn. '
+                'Expecting either an sdf or urdf file path (checking '
+                'files extensions).'
+            ),
         )
         model_path = Invoke(
             Path,
@@ -297,53 +278,43 @@ def gz_spawn_entity(
         )
 
     if name is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'name',
-                description='Name of the entity to spawn inside gz',
-                default_value='tiago',
-            )
+        yield DeclareLaunchArgument(
+            'name',
+            description='Name of the entity to spawn inside gz',
+            default_value='tiago',
         )
         name = LaunchConfiguration('name')
 
     if world is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'world',
-                description=(
-                    'Name of the world we wish to spawn the entity into'
-                ),
-                default_value='empty',
-            )
+        yield DeclareLaunchArgument(
+            'world',
+            description=(
+                'Name of the world we wish to spawn the entity into'
+            ),
+            default_value='empty',
         )
         world = LaunchConfiguration('world')
 
     if timeout_ms is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'timeout_ms',
-                description='Timeout associated to the gz request (in ms)',
-                default_value='1000',
-            )
+        yield DeclareLaunchArgument(
+            'timeout_ms',
+            description='Timeout associated to the gz request (in ms)',
+            default_value='1000',
         )
         timeout_ms = Invoke(
             int,
             LaunchConfiguration('timeout_ms'),
         )
 
-    description.add_action(
-        Invoke(
-            __make_spawn_cmd,
-            world,
-            name,
-            model_path,
-            timeout_ms,
-        ).and_then(
-            __log_then_forward_cmd
-        ).and_then_with_key(
-            'cmd',
-            ExecuteProcess,
-        )
+    yield Invoke(
+        __make_spawn_cmd,
+        world,
+        name,
+        model_path,
+        timeout_ms,
+    ).and_then(
+        __log_then_forward_cmd
+    ).and_then_with_key(
+        'cmd',
+        ExecuteProcess,
     )
-
-    return description

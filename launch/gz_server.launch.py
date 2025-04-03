@@ -2,6 +2,8 @@
 
 """ROS2 launch file launching a GZ server."""
 
+from launch import LaunchDescription
+
 from tiago_lfc.launch import (
     gz_server,
 )
@@ -9,4 +11,4 @@ from tiago_lfc.launch import (
 
 def generate_launch_description():
     """Create a GZ server."""
-    return gz_server()
+    return LaunchDescription(gz_server())

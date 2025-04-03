@@ -14,6 +14,7 @@ from launch import (
     LaunchDescription,
 )
 from launch.actions import (
+    GroupAction,
     SetLaunchConfiguration,
 )
 from launch.substitutions import (
@@ -29,7 +30,7 @@ from tiago_lfc.launch import (
     gz_spawn_entity,
     load_controllers,
     run_robot_state_publisher,
-    switch_controllers,
+    # switch_controllers,
 )
 
 
@@ -70,7 +71,9 @@ def generate_launch_description():
     # - Find out how to forward a valid value using 'sdf' param instead of
     #   'sdf_filename' in gz service /world/create (EntityFactory msg) ?
     # - ... ?
-    for action in chain(
+
+    spawn_robot_state_publisher = GroupAction(
+        chain(
             add_robot_description_from_xacro(
                 file_path=xacro_file,
                 mappings=evaluate_dict(
@@ -88,39 +91,26 @@ def generate_launch_description():
                 use_sim_time=LaunchConfiguration('use_sim_time'),
 
             ),
-    ):
-        description.add_action(action)
-
-    gz_server(
-        description=description,
+        )
     )
+    description.add_action(spawn_robot_state_publisher)
 
-    # NOTE:
-    # gz_server declare 'world' as an argument, but require a '.sdf' file.
-    # Then, when calling GZ services associated to that world, the world is
-    # mentionned without its file extension.
-    # This is this 'world' (without the file extension) that is used by
-    # gz_spawn_entity below.
-    world = LaunchConfiguration('world')
-
-    # This remove the file extension from 'world'
-    description.add_action(
-        SetLaunchConfiguration(
-            'world',
-            Invoke(
-                lambda v: Path(v).stem,
-                world
+    start_gz_server = GroupAction(
+        chain(
+            gz_server(),
+            gz_spawn_entity(
+                model_path=urdf_file,
+                name='tiago',
+                world=Invoke(
+                    # Remove the file extension from world defined by gz_server()
+                    lambda v: Path(v).stem,
+                    LaunchConfiguration('world'),
+                ),
+                timeout_ms=1000,
             )
         )
     )
-
-    gz_spawn_entity(
-        model_path=urdf_file,
-        name='tiago',
-        world=world,
-        timeout_ms=1000,
-        description=description,
-    )
+    description.add_action(start_gz_server)
 
     load_controllers(
         controllers=('lfc', 'jse'),
