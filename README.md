@@ -17,14 +17,21 @@ WS=<WORKSPACE>; mkdir -p ${WS}/src && cd ${WS}/src
 
 Then clone this repo inside `<WORKSPACE>/src` using one of:
 
-* [Recommanded] SSH: `git clone git@github.com:ArthurVal/tiago_lfc.git`
-* HTTPS: `git clone https://github.com/ArthurVal/tiago_lfc.git`
+* [Recommanded] SSH
+```sh
+git clone git@github.com:ArthurVal/tiago_lfc.git
+```
+
+* HTTPS
+```sh
+git clone https://github.com/ArthurVal/tiago_lfc.git
+```
 
 ### Dependencies
 
 > [!tip]
-> You can check for any deps availability on your system using `ros2 pkg list |
-> grep <NAME>`
+> You can check for any deps availability on your system using<br>
+> `ros2 pkg list | grep <NAME>`
 
 #### `tiago_description`
 
