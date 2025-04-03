@@ -90,8 +90,14 @@ colcon build --symlink-install --cmake-args -DBUILD_TESTING=OFF -DCMAKE_BUILD_TY
 > it.<br>
 > `source <WORKSPACE>/install/local_setup.<EXTENSION>`
 
+- Terminal 1: Spawn GZ gui + Contains logs from `ros_control` etc...
 ```sh
 ros2 launch tiago_lfc gz_tiago_lfc.launch.py
+```
+
+- Terminal 2: Interact with GZ
+```sh
+ros2 launch tiago_lfc switch_controllers.launch.py controllers:='lfc jse' activate:=True
 ```
 
 ### Launch files

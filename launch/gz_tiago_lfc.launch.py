@@ -128,11 +128,14 @@ def generate_launch_description():
         description=description,
     )
 
-    switch_controllers(
-        controllers=('lfc', 'jse'),
-        activate=True,
-        controller_manager='/controller_manager',
-        description=description,
-    )
+    # TODO: Delay this AFTER the controllers are loaded because F*** ROS launch
+    # file is not sequencial, this is a pain in the ass...
+
+    # switch_controllers(
+    #     controllers=('lfc', 'jse'),
+    #     activate=True,
+    #     controller_manager='/controller_manager',
+    #     description=description,
+    # )
 
     return description
