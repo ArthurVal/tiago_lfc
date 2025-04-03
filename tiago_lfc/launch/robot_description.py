@@ -10,12 +10,13 @@ from pathlib import (
 )
 from typing import (
     Dict,
+    List,
     Optional,
     Text,
 )
 
 from launch import (
-    LaunchDescription,
+    Action,
 )
 from launch.actions import (
     DeclareLaunchArgument,
@@ -91,8 +92,7 @@ def add_robot_description_from_xacro(
         file_path: Optional[SubstitutionOr[Path]] = None,
         mappings: Optional[SubstitutionOr[Mapping[Text, Text]]] = None,
         output_file: Optional[SubstitutionOr[Path]] = None,
-        description: LaunchDescription = LaunchDescription(),
-) -> LaunchDescription:
+) -> List[Action]:
     """Create a Configuration with the robot_description from a xacro.
 
     Parameters
@@ -102,18 +102,18 @@ def add_robot_description_from_xacro(
       for it
     mappings: Optional[SubstitutionOr[Mapping[Text, Text]]]
       Mappings of the XACRO. If None, declare a launch argument for it.
-    description: LaunchDescription
-      If defined, use this description instead of creating a new one
     output_file: Optional[SubstitutionOr[Path]]
       If given, will write the content of robot_description to the given file
 
     Returns
     -------
-    LaunchDescription
-      The launch description populated with robot_description
+    List[Action]
+      All ROS launch Actions used to perform the needed task.
     """
+    actions = []
+
     if file_path is None:
-        description.add_action(
+        actions.append(
             DeclareLaunchArgument(
                 'file_path',
                 description=(
@@ -127,7 +127,7 @@ def add_robot_description_from_xacro(
         )
 
     if mappings is None:
-        description.add_action(
+        actions.append(
             DeclareLaunchArgument(
                 'mappings',
                 description=(
@@ -148,7 +148,7 @@ def add_robot_description_from_xacro(
         )
 
     if output_file is None:
-        description.add_action(
+        actions.append(
             DeclareLaunchArgument(
                 'output_file',
                 description=(
@@ -163,7 +163,7 @@ def add_robot_description_from_xacro(
             LaunchConfiguration('output_file'),
         )
 
-    description.add_action(
+    actions.append(
         SetLaunchConfiguration(
             name='robot_description',
             value=Invoke(
@@ -177,4 +177,4 @@ def add_robot_description_from_xacro(
         ),
     )
 
-    return description
+    return actions

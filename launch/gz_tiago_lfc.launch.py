@@ -68,16 +68,15 @@ def generate_launch_description():
     # - Find out how to forward a valid value using 'sdf' param instead of
     #   'sdf_filename' in gz service /world/create (EntityFactory msg) ?
     # - ... ?
-
-    add_robot_description_from_xacro(
-        file_path=xacro_file,
-        mappings=evaluate_dict(
-            {arg.name: LaunchConfiguration(arg.name) for arg in xacro_args}
-            | {'use_sim_time': LaunchConfiguration('use_sim_time')}
-        ),
-        output_file=urdf_file,
-        description=description,
-    )
+    for action in add_robot_description_from_xacro(
+            file_path=xacro_file,
+            mappings=evaluate_dict(
+                {arg.name: LaunchConfiguration(arg.name) for arg in xacro_args}
+                | {'use_sim_time': LaunchConfiguration('use_sim_time')}
+            ),
+            output_file=urdf_file,
+    ):
+        description.add_action(action)
 
     run_robot_state_publisher(
         robot_description=LaunchConfiguration('robot_description'),

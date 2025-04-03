@@ -45,14 +45,15 @@ def generate_launch_description():
         )
     )
 
-    return add_robot_description_from_xacro(
-        file_path=Path(
-            get_package_share_directory('tiago_description'),
-            'robots',
-            'tiago.urdf.xacro',
-        ),
-        mappings=evaluate_dict(
-            {arg.name: LaunchConfiguration(arg.name) for arg in xacro_args}
-        ),
-        description=LaunchDescription(xacro_args),
+    return LaunchDescription(
+        xacro_args + add_robot_description_from_xacro(
+            file_path=Path(
+                get_package_share_directory('tiago_description'),
+                'robots',
+                'tiago.urdf.xacro',
+            ),
+            mappings=evaluate_dict(
+                {arg.name: LaunchConfiguration(arg.name) for arg in xacro_args}
+            ),
+        )
     )
