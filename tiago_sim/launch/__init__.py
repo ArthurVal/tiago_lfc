@@ -28,6 +28,9 @@ from .robot_description import (
 from .robot_state_publisher import (
     run_robot_state_publisher
 )
+from .ros2_control import (
+    load_controllers,
+)
 from .utils import (
     dict_to_string,
 )
@@ -58,6 +61,9 @@ __all__ = [
 
     # robot_state_publisher
     'run_robot_state_publisher',
+
+    # ros2_control
+    'load_controllers',
 
     # utils
     'dict_to_string',
