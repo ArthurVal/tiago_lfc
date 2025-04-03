@@ -2,7 +2,7 @@
 
 """Launch file use to load ANY ros2 control controller."""
 
-from tiago_sim.launch import (
+from tiago_lfc.launch import (
     load_controllers,
 )
 

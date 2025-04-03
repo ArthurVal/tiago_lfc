@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Main entry point for tiago_sim package."""
+"""Main entry point for tiago_lfc package."""
 
 from . import launch
 

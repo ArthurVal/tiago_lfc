@@ -12,7 +12,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
-from tiago_sim.launch import (
+from tiago_lfc.launch import (
     add_robot_description_from_xacro,
     all_arguments_from_yaml,
     evaluate_dict,

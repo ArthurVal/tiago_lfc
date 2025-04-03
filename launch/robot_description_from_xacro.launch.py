@@ -2,7 +2,7 @@
 
 """Populate robot_description configuration from any xacro."""
 
-from tiago_sim.launch import (
+from tiago_lfc.launch import (
     add_robot_description_from_xacro,
 )
 

@@ -4,7 +4,7 @@
 
 from launch.substitutions import LaunchConfiguration
 
-from tiago_sim.launch import (
+from tiago_lfc.launch import (
     add_robot_description_from_xacro,
     run_robot_state_publisher,
 )

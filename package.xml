@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>tiago_sim</name>
+  <name>tiago_lfc</name>
   <version>1.0.0</version>
   <description>TODO.</description>
   <maintainer email="todo@laas.fr">Noel Jimenez</maintainer>

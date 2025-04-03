@@ -1,53 +1,35 @@
-# `tiago_sim`
+# `tiago_lfc`
 
-This small package contains ROS2 launch utils tools to ease the deployment of
-tiago robot inside gazebo.
+This project provides useful tools to ease the deployment of the
+[`linear_feedback_controller`](https://github.com/loco-3d/linear-feedback-controller)
+inside Tiago, using ROS jazzy and Gazebo Harmonic.
 
 ## Install
 
 ### Setup
 
-Following the classical ROS2 workflow, create a `<WORKSPACE>` with a `src`
-folder accordingly:
+Following the classical ROS2 workflow, create a colcon `<WORKSPACE>` with a
+`src` folder (set `<WORKSPACE>` accordingly to your need):
 
 ```sh
-mkdir -p <WORKSPACE>/src
+WS=<WORKSPACE>; mkdir -p ${WS}/src && cd ${WS}/src
 ```
 
-Then clone this repo inside the source folder
+Then clone this repo inside `<WORKSPACE>/src` using one of:
 
-```sh
-cd <WORKSPACE>/src
-git clone https://gitlab.laas.fr/avaliente/tiago_sim.git
-```
-
-The workspace should look something like this (named `tiago_sim_ws` in this example):
-
-```sh
-tree tiago_sim_ws -L 3
-tiago_sim_ws
-└── src
-    └── tiago_sim
-        ├── CMakeLists.txt
-        ├── config
-        ├── dependencies_lfc.repos
-        ├── dependencies.repos
-        ├── launch
-        ├── LICENSE
-        ├── package.xml
-        ├── README.md
-        └── tiago_sim
-
-6 directories, 6 files
-```
+* [Recommanded] SSH: `git clone git@github.com:ArthurVal/tiago_lfc.git`
+* HTTPS: `git clone https://github.com/ArthurVal/tiago_lfc.git`
 
 ### Dependencies
 
+> [!tip]
+> You can check for any deps availability on your system using `ros2 pkg list |
+> grep <NAME>`
+
 #### `tiago_description`
 
-If the `tiago_description` dependency is not installed on your system (required
-to get the tiago's xacro/urdf model description), you can fetch them inside your
-workspace by doing the following:
+If the `tiago_description` dependency is not installed you can fetch them inside
+your workspace by doing the following:
 
 > [!important]
 > The following commands expect you to be inside `<WORKSPACE>/src`
@@ -66,23 +48,28 @@ git clone https://github.com/Tiago-Harmonic/pal_urdf_utils.git --branch jazzy
 
 > [!note]
 > Currently this fetches **ONLY** the strict minimum dependencies required to
-> make `tiago_sim` work.<br/>
+> make `tiago_lfc` work.<br/>
 > If needed, you can fetch the full set of dependencies using:<br/>
-> `vcs import . < tiago_sim/dependencies.repos`
+> `vcs import . < tiago_lfc/dependencies/tiago_robot.repos`
 
-> [!note]
-> TODO: Find a way to simplify this ?
+#### [`linear_feedback_controller`](https://github.com/loco-3d/linear-feedback-controller)
 
-#### Optional: `linear_feedback_controller`
-
-If you also want to include the `LFC` inside this workspace:
+If the `linear_feedback_controller` is not installed you can fetch them inside
+your workspace by doing the following:
 
 > [!important]
 > The following command expect you to be inside `<WORKSPACE>/src`
 > (i.e. `cd <WORKSPACE>/src` beforehands)
 
 ```sh
-vcs import . < tiago_sim/dependencies_lfc.repos
+vcs import . < tiago_lfc/dependencies/lfc.repos
+```
+
+Additionally, you can install the `linear_feedback_controller` build
+dependencies on your system using:
+
+```sh
+rosdep install -i -t build --from-paths linear_feedback_controller --from-paths linear_feedback_controller-msgs
 ```
 
 ### Build
@@ -90,27 +77,29 @@ vcs import . < tiago_sim/dependencies_lfc.repos
 Using `colcon`:
 
 ```sh
-source /opt/ros/<DISTRO>/setup.zsh
 cd <WORKSPACE>
-colcon build --symlink-install
-source install/local_setup.zsh
+colcon build --symlink-install --cmake-args -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release
 ```
+
+> [!tip]
+> Don't forget to source the local setup file afterwards.<br>
+> `source <WORKSPACE>/install/local_setup.<EXTENSION>`
 
 ## Usage
 
 ### TLDR
 
 ```sh
-ros2 launch tiago_sim tiago_sim.launch.py
+ros2 launch tiago_lfc gz_tiago_lfc.launch.py
 ```
 
 ### Launch files
 
 This package provides several launch files can be simply used through:<br/>
-`ros2 launch tiago_sim <LAUNCH FILE> [ARGS...]` .
+`ros2 launch tiago_lfc <LAUNCH FILE> [ARGS...]` .
 
 > [!tip]
-> Use `-s` (`ros2 launch tiago_sim tiago_sim.launch.py -s`) to access the full
+> Use `-s` (`ros2 launch tiago_lfc <LAUNCH FILE> -s`) to access the full
 > list of arguments
 
 * Generic launch files (doesn't depends on Tiago at all):
@@ -128,7 +117,7 @@ This package provides several launch files can be simply used through:<br/>
 |-----------------------------------------|-----------------------------------------------------------|
 | `tiago_robot_description.launch.py`     | Create Tiago's `robot_description`                        |
 | `tiago_robot_state_publisher.launch.py` | Start Tiago's `robot_state_publisher`                     |
-| `tiago_sim.launch.py`                   | Launch everything needed at once to spawn Tiago inside GZ |
+| `gz_tiago_lfc.launch.py`                | Launch everything needed at once to spawn Tiago inside GZ |
 
 > [!note]
 > The files used from `tiago_description` are: <br/>
@@ -137,180 +126,29 @@ This package provides several launch files can be simply used through:<br/>
 
 ## Common Issues
 
-### Robot's model is incomplete
+### [GZ] Robot's model is incomplete
 
 When spawning the robot inside Gazebo, you may see that it's 'incomplete',
 missing some 3D pieces on the model.
 
 This is due to the fact that, when running the gazebo server, you have to tell
-to gazebo the location of 3D models defined wihtin the URDF.
+gazebo the location of 3D models defined wihtin the URDF.
 
 To fix this, you can either:
-  - `export GZ_SIM_RESOURCE_PATH=<PATH>:<PATH>:<PATH>` (before launching the GZ server, this is permanent);
-  - `GZ_SIM_RESOURCE_PATH=<PATH>:<PATH>:<PATH>; ros2 launch ...`;
-  - `ros2 launch tiago_sim ... resource_path:='<PATH>:<PATH>:<PATH>...'`;
+- Update `GZ_SIM_RESOURCE_PATH` environment variable accordingly (`export
+  GZ_SIM_RESOURCE_PATH=<PATH>:<PATH>:...`);
+- Use `resource_path:=<PATH>:<PATH>` launch argument;
 
-When using having only the `*_description` package inside `<WORKSPACE>/src`, you
-can simply set the above mentionned variable the `<WORKSPACE>/src` (e.g. :
-`resource_path:=$(pwd)/src` when running `ros2 launch` command from within the
-`<WORKSPACE>`).
+> [!tip]
+> If you only have the `*_description` folders inside `<WORKSPACE>/src`, you can
+> simply set the above mentionned variable to `<WORKSPACE>/src`
+> (e.g. :`resource_path:=<WORKSPACE>/src`).
 
-### ros2_control's `/controller_manager` is not running
+### [GZ] ros2_control's `/controller_manager` is not running
 
 If, after launching the simulation, `ros2 node list` doesn't show the
-`/controller_manger`, it means that gazebo failed to launch the `ros2_control`
-plugin.
-
-You can easily confirm that the plugin is launched by looking at the logs coming
-from `[gz_ros_control]` listing all hardware interfaces.
-
-<details>
-<summary>
-Example
-</summary>
-
-```sh
-...
-[gz-2] [INFO] [1743405688.362940320] [gz_ros_control]: [gz_ros2_control] Fixed joint [wrist_ft_joint] (Entity=109)] is skipped
-[gz-2] [INFO] [1743405688.366573870] [gz_ros_control]: Loading controller_manager
-[gz-2] [INFO] [1743405688.396108088] [controller_manager]: Subscribing to '/robot_description' topic for robot description.
-[gz-2] [WARN] [1743405688.399351176] [gz_ros_control]: Waiting RM to load and initialize hardware...
-[gz-2] [INFO] [1743405688.406918690] [controller_manager]: Received robot description from topic.
-[gz-2] [INFO] [1743405688.415132795] [gz_ros_control]: The position_proportional_gain has been set to: 0.1
-[gz-2] [INFO] [1743405688.415190911] [gz_ros_control]: Loading joint: wheel_right_joint
-[gz-2] [INFO] [1743405688.415197916] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415202944] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415209610] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415216775] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415230190] [gz_ros_control]: Loading joint: wheel_left_joint
-[gz-2] [INFO] [1743405688.415235381] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415239839] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415246774] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415251119] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415262487] [gz_ros_control]: Loading joint: torso_lift_joint
-[gz-2] [INFO] [1743405688.415267546] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415271662] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415276368] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415280681] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415285426] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415289519] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415301743] [gz_ros_control]: Loading joint: arm_1_joint
-[gz-2] [INFO] [1743405688.415306609] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415310695] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415315008] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415319246] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415323382] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415328033] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415335729] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415343046] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415352001] [gz_ros_control]: Loading joint: arm_2_joint
-[gz-2] [INFO] [1743405688.415356781] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415361016] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415366358] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415370797] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415375186] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415379102] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415385724] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415391284] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415401038] [gz_ros_control]: Loading joint: arm_3_joint
-[gz-2] [INFO] [1743405688.415405763] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415409827] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415413882] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415420259] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415424504] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415428585] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415435275] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415443010] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415452141] [gz_ros_control]: Loading joint: arm_4_joint
-[gz-2] [INFO] [1743405688.415457092] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415461346] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415465571] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415469974] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415476235] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415480699] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415496660] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415503788] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415514004] [gz_ros_control]: Loading joint: arm_5_joint
-[gz-2] [INFO] [1743405688.415519358] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415523598] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415527592] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415531641] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415553348] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415559489] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415566767] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415574414] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415583619] [gz_ros_control]: Loading joint: arm_6_joint
-[gz-2] [INFO] [1743405688.415588789] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415593088] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415597218] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415601480] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415605507] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415609754] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415616538] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415621963] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415632832] [gz_ros_control]: Loading joint: arm_7_joint
-[gz-2] [INFO] [1743405688.415637506] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415641766] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415645757] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415650005] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415657496] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415661638] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415668183] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415673719] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415684023] [gz_ros_control]: Loading joint: gripper_left_finger_joint
-[gz-2] [INFO] [1743405688.415688908] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415693078] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415697153] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415701464] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415706000] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415710020] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415721081] [gz_ros_control]: Loading joint: gripper_right_finger_joint
-[gz-2] [INFO] [1743405688.415725857] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415730180] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415734717] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415738849] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415742988] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415746958] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415757250] [gz_ros_control]: Loading joint: head_1_joint
-[gz-2] [INFO] [1743405688.415762228] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415766378] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415774275] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415781099] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415785488] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415789547] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415801477] [gz_ros_control]: Loading joint: head_2_joint
-[gz-2] [INFO] [1743405688.415806237] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415810374] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415814505] [gz_ros_control]: 		 velocity
-[gz-2] [INFO] [1743405688.415818635] [gz_ros_control]: 		 effort
-[gz-2] [INFO] [1743405688.415822802] [gz_ros_control]: 	Command:
-[gz-2] [INFO] [1743405688.415826817] [gz_ros_control]: 		 position
-[gz-2] [INFO] [1743405688.415898333] [gz_ros_control]: Loading sensor: base_imu_sensor
-[gz-2] [INFO] [1743405688.415909988] [gz_ros_control]: 	State:
-[gz-2] [INFO] [1743405688.415924319] [gz_ros_control]: 		 orientation.x
-[gz-2] [INFO] [1743405688.415929605] [gz_ros_control]: 		 orientation.y
-[gz-2] [INFO] [1743405688.415934880] [gz_ros_control]: 		 orientation.z
-[gz-2] [INFO] [1743405688.415939054] [gz_ros_control]: 		 orientation.w
-[gz-2] [INFO] [1743405688.415943260] [gz_ros_control]: 		 angular_velocity.x
-[gz-2] [INFO] [1743405688.415947607] [gz_ros_control]: 		 angular_velocity.y
-[gz-2] [INFO] [1743405688.415954593] [gz_ros_control]: 		 angular_velocity.z
-[gz-2] [INFO] [1743405688.415958951] [gz_ros_control]: 		 linear_acceleration.x
-[gz-2] [INFO] [1743405688.415963486] [gz_ros_control]: 		 linear_acceleration.y
-[gz-2] [INFO] [1743405688.415969857] [gz_ros_control]: 		 linear_acceleration.z
-[gz-2] [INFO] [1743405688.416020912] [gz_ros_control.resource_manager]: Initialize hardware 'ros2_control_tiago_system'
-[gz-2] [INFO] [1743405688.416229873] [gz_ros_control.resource_manager]: Successful initialization of hardware 'ros2_control_tiago_system'
-[gz-2] [INFO] [1743405688.416543388] [resource_manager]: 'configure' hardware 'ros2_control_tiago_system'
-[gz-2] [INFO] [1743405688.416549631] [gz_ros_control]: System Successfully configured!
-[gz-2] [INFO] [1743405688.416558012] [resource_manager]: Successful 'configure' of hardware 'ros2_control_tiago_system'
-[gz-2] [INFO] [1743405688.416571705] [resource_manager]: 'activate' hardware 'ros2_control_tiago_system'
-[gz-2] [INFO] [1743405688.416579214] [resource_manager]: Successful 'activate' of hardware 'ros2_control_tiago_system'
-[gz-2] [INFO] [1743405688.416591884] [controller_manager]: Resource Manager has been successfully initialized. Starting Controller Manager services...
-...
-```
-
-</details>
-
-If this is not the case, the following error message should've appeared:
+`/controller_manger`, and launching the tiago's simulation shows the following
+log:
 
 ```sh
 ...
@@ -318,16 +156,19 @@ If this is not the case, the following error message should've appeared:
 ...
 ```
 
-This GZ plugin (`libgz_ros2_control-system.so`) is, most of the time, installed
-directly within the `/opt/ros/<DISTRO>/lib` directory, but, for some unknown
-reasons, GZ doesn't automatically add this path to the system plugin lookup
-path....
+It means that gazebo failed to launch the `ros2_control` plugin.
+
+> [!tip]
+> You can easily confirm that the plugin is launched by looking at the logs coming
+> from `[gz_ros_control]` listing all hardware interfaces.
+
+The `libgz_ros2_control-system.so` plugin comes automatically when installing
+Gazebo through `ros-<DISTRO>-gz-ros2-control` and is installed directly within
+the `/opt/ros/<DISTRO>/lib` directory, but, for some unknown reasons, GZ doesn't
+automatically add this path to the system plugin lookup path...
 
 To fix this, you can either (replace `<DISTRO>` with `jazzy`, `rolling`, ...,
 your current ROS distro):
-  - Setup the env variable `export
-    GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib` then call `ros2 launch ...`
-  - Call ros2 launch using `GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib;
-    ros2 launch ...`;
-  - Call tiago_sim launch files using `ros2 launch
-    ... system_plugin_path:=/opt/ros/<DISTRO>/lib`;
+- Update `GZ_SIM_SYSTEM_PLUGIN_PATH` environment variable accordingly (`export
+  GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/<DISTRO>/lib`);
+- Use `system_plugin_path:=/opt/ros/<DISTRO>/lib` launch argument;
