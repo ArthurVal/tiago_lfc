@@ -62,7 +62,9 @@ def __make_spawner_args(
         args.append('--inactive')
 
     if controller_manager is not None:
-        logger.info('Targeting controller_manager \"{}\"', controller_manager)
+        logger.info(
+            'Targeting controller_manager \"{}\"'.format(controller_manager)
+        )
         args += [
             '-c',
             controller_manager,
@@ -222,7 +224,9 @@ def __make_switch_controllers_cmd(
     )
 
     if controller_manager is not None:
-        logger.info('Targeting controller_manager \"{}\"', controller_manager)
+        logger.info(
+            'Targeting controller_manager \"{}\"'.format(controller_manager)
+        )
         cmd += [
             '-c',
             controller_manager,
