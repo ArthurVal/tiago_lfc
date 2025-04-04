@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- [CHANGELOG]: Markdown indentation issues
+- `CHANGELOG.md`: Markdown indentation issues
 
 ## [1.0.1] - 2025-04-04
 
