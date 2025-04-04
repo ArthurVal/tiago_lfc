@@ -76,7 +76,7 @@ Additionally, you can install the `linear_feedback_controller` build
 dependencies on your system using:
 
 ```sh
-rosdep install -i -t build --from-paths linear_feedback_controller --from-paths linear_feedback_controller-msgs
+rosdep install -i -t build --from-paths linear_feedback_controller --from-paths linear_feedback_controller_msgs
 ```
 
 ### Build
@@ -113,7 +113,7 @@ ros2 launch tiago_lfc switch_controllers.launch.py controllers:='lfc jse' activa
 
 ### Launch files
 
-This package provides several launch files can be simply used through:<br/>
+This package provides several launch files that can simply be used through:<br/>
 `ros2 launch tiago_lfc <FILE> [ARGS...]` .
 
 > [!tip]
