@@ -3,6 +3,7 @@
 """Add utils launch function managing ros_control stuff."""
 from collections.abc import (
     Iterable,
+    Generator,
 )
 from pathlib import (
     Path,
@@ -14,7 +15,7 @@ from typing import (
 )
 
 from launch import (
-    LaunchDescription,
+    Action,
 )
 from launch.actions import (
     DeclareLaunchArgument,
@@ -79,8 +80,7 @@ def load_controllers(
         param_file: Optional[SubstitutionOr[Path]] = None,
         activate: Optional[SubstitutionOr[bool]] = None,
         controller_manager: Optional[SubstitutionOr[Text]] = None,
-        description: LaunchDescription = LaunchDescription(),
-) -> LaunchDescription:
+) -> Generator[Action]:
     """Load controllers into the controller manager.
 
     Parameters
@@ -99,24 +99,19 @@ def load_controllers(
     controller_manager: Optional[SubstitutionOr[Text]]
         Name of the controller manager we wish to load controllers in. If None,
         declare a launch argument for it (default to '/controller_manager').
-    description: Optional[LaunchDescription]
-      LaunchDescription to use instead of creating a new one
 
     Returns
     -------
-    LaunchDescription
-      The launch description filled with the action needed to perform this
-      function.
+    Generator[Action]
+      All ROS launch Actions used to perform the needed task.
     """
     if controllers is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'controllers',
-                description=(
-                    'List of whitespace separated of name(s) corresponding to '
-                    'the controller(s) we wish to load'
-                ),
-            )
+        yield DeclareLaunchArgument(
+            'controllers',
+            description=(
+                'List of whitespace separated of name(s) corresponding to '
+                'the controller(s) we wish to load'
+            ),
         )
         controllers = Invoke(
             lambda txt: txt.split(' '),
@@ -124,14 +119,12 @@ def load_controllers(
         )
 
     if param_file is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'param_file',
-                description=(
-                    'Path to the YAML controller parameter file'
-                ),
-                default_value='',
-            )
+        yield DeclareLaunchArgument(
+            'param_file',
+            description=(
+                'Path to the YAML controller parameter file'
+            ),
+            default_value='',
         )
         param_file = Invoke(
             lambda txt: Path(txt) if txt != '' else None,
@@ -139,18 +132,16 @@ def load_controllers(
         )
 
     if activate is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'activate',
-                description=(
-                    (
-                        'True if you wish to directly activate the controller '
-                        'when loading (default to False)'
-                     )
-                ),
-                default_value='False',
-                choices=['False', 'True']
-            )
+        yield DeclareLaunchArgument(
+            'activate',
+            description=(
+                (
+                    'True if you wish to directly activate the controller '
+                    'when loading (default to False)'
+                )
+            ),
+            default_value='False',
+            choices=['False', 'True']
         )
         activate = Invoke(
             lambda txt: True if txt == 'True' else False,
@@ -158,47 +149,40 @@ def load_controllers(
         )
 
     if controller_manager is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'controller_manager',
-                description=(
-                    (
-                        'Name of the controller manager we wish to load the '
-                        'controllers in.'
-                     )
-                ),
-                default_value='',
-            )
+        yield DeclareLaunchArgument(
+            'controller_manager',
+            description=(
+                (
+                    'Name of the controller manager we wish to load the '
+                    'controllers in.'
+                )
+            ),
+            default_value='',
         )
         controller_manager = Invoke(
             lambda txt: txt if txt != '' else None,
             LaunchConfiguration('controller_manager'),
         )
 
-    description.add_action(
-        Invoke(
-            __make_spawner_args,
-            controllers=controllers,
-            activate=activate,
-            param_file=param_file,
-            controller_manager=controller_manager,
-        ).and_then_with_key(
-            'arguments',
-            Node,
-            package='controller_manager',
-            executable='spawner',
-            output='screen'
-        )
+    yield Invoke(
+        __make_spawner_args,
+        controllers=controllers,
+        activate=activate,
+        param_file=param_file,
+        controller_manager=controller_manager,
+    ).and_then_with_key(
+        'arguments',
+        Node,
+        package='controller_manager',
+        executable='spawner',
+        output='screen'
     )
 
-    description.add_action(
-        Invoke(
-            logger.info,
-            'Unload any controller using '
-            '`ros2 controll unload_controller <NAME>`'
-        )
+    yield Invoke(
+        logger.info,
+        'Unload any controller using '
+        '`ros2 controll unload_controller <NAME>`'
     )
-    return description
 
 
 def __make_switch_controllers_cmd(
@@ -241,8 +225,7 @@ def switch_controllers(
         controllers: Optional[SubstitutionOr[Iterable[Text]]] = None,
         activate: Optional[SubstitutionOr[bool]] = None,
         controller_manager: Optional[SubstitutionOr[Text]] = None,
-        description: LaunchDescription = LaunchDescription(),
-) -> LaunchDescription:
+) -> Generator[Action]:
     """Activate/Deactivate controllers.
 
     Parameters
@@ -256,24 +239,19 @@ def switch_controllers(
     controller_manager: Optional[SubstitutionOr[Text]]
         Name of the controller manager containing the controllers. If None,
         declare a launch argument for it (default to '/controller_manager').
-    description: Optional[LaunchDescription]
-      LaunchDescription to use instead of creating a new one
 
     Returns
     -------
-    LaunchDescription
-      The launch description filled with the action needed to perform this
-      function.
+    Generator[Action]
+      All ROS launch Actions used to perform the needed task.
     """
     if controllers is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'controllers',
-                description=(
-                    'List of whitespace separated of name(s) corresponding to '
-                    'the controller(s) we wish to activate/deactivate'
-                ),
-            )
+        yield DeclareLaunchArgument(
+            'controllers',
+            description=(
+                'List of whitespace separated of name(s) corresponding to '
+                'the controller(s) we wish to activate/deactivate'
+            ),
         )
         controllers = Invoke(
             lambda txt: txt.split(' '),
@@ -281,17 +259,15 @@ def switch_controllers(
         )
 
     if activate is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'activate',
-                description=(
-                    (
-                        'True if you wish to activate the controllers, False '
-                        'to deactivate them'
-                     )
-                ),
-                choices=['False', 'True']
-            )
+        yield DeclareLaunchArgument(
+            'activate',
+            description=(
+                (
+                    'True if you wish to activate the controllers, False '
+                    'to deactivate them'
+                )
+            ),
+            choices=['False', 'True']
         )
         activate = Invoke(
             lambda txt: True if txt == 'True' else False,
@@ -299,33 +275,27 @@ def switch_controllers(
         )
 
     if controller_manager is None:
-        description.add_action(
-            DeclareLaunchArgument(
-                'controller_manager',
-                description=(
-                    (
-                        'Name of the controller manager containing the '
-                        'controllers listed'
-                     )
-                ),
-                default_value='',
-            )
+        yield DeclareLaunchArgument(
+            'controller_manager',
+            description=(
+                (
+                    'Name of the controller manager containing the '
+                    'controllers listed'
+                )
+            ),
+            default_value='',
         )
         controller_manager = Invoke(
             lambda txt: txt if txt != '' else None,
             LaunchConfiguration('controller_manager'),
         )
 
-    description.add_action(
-        Invoke(
-            __make_switch_controllers_cmd,
-            controllers=controllers,
-            activate=activate,
-            controller_manager=controller_manager,
-        ).and_then_with_key(
-            'cmd',
-            ExecuteProcess,
-        )
+    yield Invoke(
+        __make_switch_controllers_cmd,
+        controllers=controllers,
+        activate=activate,
+        controller_manager=controller_manager,
+    ).and_then_with_key(
+        'cmd',
+        ExecuteProcess,
     )
-
-    return description

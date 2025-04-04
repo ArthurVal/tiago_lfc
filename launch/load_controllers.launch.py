@@ -2,6 +2,8 @@
 
 """Launch file use to load ANY ros2 control controller."""
 
+from launch import LaunchDescription
+
 from tiago_lfc.launch import (
     load_controllers,
 )
@@ -9,4 +11,4 @@ from tiago_lfc.launch import (
 
 def generate_launch_description():
     """Load controllers."""
-    return load_controllers()
+    return LaunchDescription(load_controllers())

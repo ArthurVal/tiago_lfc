@@ -14,7 +14,6 @@ from launch import (
     LaunchDescription,
 )
 from launch.actions import (
-    GroupAction,
     SetLaunchConfiguration,
 )
 from launch.substitutions import (
@@ -52,16 +51,6 @@ def generate_launch_description():
         )
     )
 
-    description = LaunchDescription(xacro_args)
-
-    # Since we are simulating, use_sim_time is FORCED here
-    description.add_action(
-        SetLaunchConfiguration(
-            'use_sim_time',
-            'True',
-        ),
-    )
-
     # FIXME: We shouldn't create a file at this location...
     urdf_file = xacro_file.with_suffix('.urdf')
     # Some possible work around TBD:
@@ -72,47 +61,40 @@ def generate_launch_description():
     #   'sdf_filename' in gz service /world/create (EntityFactory msg) ?
     # - ... ?
 
-    spawn_robot_state_publisher = GroupAction(
-        chain(
-            add_robot_description_from_xacro(
-                file_path=xacro_file,
-                mappings=evaluate_dict(
-                    {
-                        arg.name: LaunchConfiguration(arg.name)
-                        for arg in xacro_args
-                    } | {
-                        'use_sim_time': LaunchConfiguration('use_sim_time')
-                    }
-                ),
-                output_file=urdf_file,
+    spawn_robot_state_publisher = chain(
+        add_robot_description_from_xacro(
+            file_path=xacro_file,
+            mappings=evaluate_dict(
+                {
+                    arg.name: LaunchConfiguration(arg.name)
+                    for arg in xacro_args
+                } | {
+                    'use_sim_time': LaunchConfiguration('use_sim_time')
+                }
             ),
-            run_robot_state_publisher(
-                robot_description=LaunchConfiguration('robot_description'),
-                use_sim_time=LaunchConfiguration('use_sim_time'),
+            output_file=urdf_file,
+        ),
+        run_robot_state_publisher(
+            robot_description=LaunchConfiguration('robot_description'),
+            use_sim_time=LaunchConfiguration('use_sim_time'),
+        ),
+    )
 
+    start_gz = chain(
+        gz_server(),
+        gz_spawn_entity(
+            model_path=urdf_file,
+            name='tiago',
+            world=Invoke(
+                # Remove the file extension from world defined by gz_server()
+                lambda v: Path(v).stem,
+                LaunchConfiguration('world'),
             ),
+            timeout_ms=1000,
         )
     )
-    description.add_action(spawn_robot_state_publisher)
 
-    start_gz_server = GroupAction(
-        chain(
-            gz_server(),
-            gz_spawn_entity(
-                model_path=urdf_file,
-                name='tiago',
-                world=Invoke(
-                    # Remove the file extension from world defined by gz_server()
-                    lambda v: Path(v).stem,
-                    LaunchConfiguration('world'),
-                ),
-                timeout_ms=1000,
-            )
-        )
-    )
-    description.add_action(start_gz_server)
-
-    load_controllers(
+    load_lfc_jse = load_controllers(
         controllers=('lfc', 'jse'),
         param_file=Path(
             get_package_share_directory('tiago_lfc'),
@@ -121,17 +103,20 @@ def generate_launch_description():
         ),
         activate=False,
         controller_manager='/controller_manager',
-        description=description,
     )
 
-    # TODO: Delay this AFTER the controllers are loaded because F*** ROS launch
-    # file is not sequencial, this is a pain in the ass...
-
-    # switch_controllers(
-    #     controllers=('lfc', 'jse'),
-    #     activate=True,
-    #     controller_manager='/controller_manager',
-    #     description=description,
-    # )
-
-    return description
+    return LaunchDescription(
+        chain(
+            (
+                # Since we are simulating, use_sim_time is FORCED here
+                SetLaunchConfiguration(
+                    'use_sim_time',
+                    'True',
+                ),
+            ),
+            xacro_args,
+            spawn_robot_state_publisher,
+            start_gz,
+            load_lfc_jse,
+        )
+    )
