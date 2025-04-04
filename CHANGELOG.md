@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- [CHANGELOG]: Markdown indentation issues
+
 ## [1.0.1] - 2025-04-04
 
 ### Added
@@ -18,15 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [`launch`](https://github.com/ArthurVal/tiago_lfc/tree/v1.0.0/launch): All ROS2 launch files:
- - `gz_server.launch.py`
- - `gz_spawn.launch.py`
- - `gz_tiago_lfc.launch.py`
- - `load_controllers.launch.py`
- - `robot_description_from_xacro.launch.py`
- - `robot_state_publisher_from_xacro.launch.py`
- - `switch_controllers.launch.py`
- - `tiago_robot_description.launch.py`
- - `tiago_robot_state_publisher.launch.py`
+  - `gz_server.launch.py`
+  - `gz_spawn.launch.py`
+  - `gz_tiago_lfc.launch.py`
+  - `load_controllers.launch.py`
+  - `robot_description_from_xacro.launch.py`
+  - `robot_state_publisher_from_xacro.launch.py`
+  - `switch_controllers.launch.py`
+  - `tiago_robot_description.launch.py`
+  - `tiago_robot_state_publisher.launch.py`
 - [`tiago_lfc`](https://github.com/ArthurVal/tiago_lfc/tree/v1.0.0/tiago_lfc)
   python's package, with modules:
   - [`arguments.py`](https://github.com/ArthurVal/tiago_lfc/blob/v1.0.0/tiago_lfc/launch/arguments.py)
