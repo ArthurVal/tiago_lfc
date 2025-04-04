@@ -35,6 +35,17 @@ from tiago_lfc.launch import (
 
 def generate_launch_description():
     """Launch tiago within GZ."""
+    start_gz = chain(
+        (
+            # Since we are simulating, use_sim_time is FORCED here
+            SetLaunchConfiguration(
+                'use_sim_time',
+                'True',
+            ),
+        ),
+        gz_server()
+    )
+
     xacro_file = Path(
         get_package_share_directory('tiago_description'),
         'robots',
@@ -51,8 +62,8 @@ def generate_launch_description():
         )
     )
 
-    # FIXME: We shouldn't create a file at this location...
     urdf_file = xacro_file.with_suffix('.urdf')
+    # FIXME: We shouldn't create a file at this location...
     # Some possible work around TBD:
     # - Create a tmp file ?
     # - Use a fifo (not portable in windows and I don't even know if it works
@@ -61,7 +72,8 @@ def generate_launch_description():
     #   'sdf_filename' in gz service /world/create (EntityFactory msg) ?
     # - ... ?
 
-    spawn_robot_state_publisher = chain(
+    spawn_tiago = chain(
+        xacro_args,
         add_robot_description_from_xacro(
             file_path=xacro_file,
             mappings=evaluate_dict(
@@ -78,10 +90,6 @@ def generate_launch_description():
             robot_description=LaunchConfiguration('robot_description'),
             use_sim_time=LaunchConfiguration('use_sim_time'),
         ),
-    )
-
-    start_gz = chain(
-        gz_server(),
         gz_spawn_entity(
             model_path=urdf_file,
             name='tiago',
@@ -91,32 +99,19 @@ def generate_launch_description():
                 LaunchConfiguration('world'),
             ),
             timeout_ms=1000,
-        )
-    )
-
-    load_lfc_jse = load_controllers(
-        controllers=('lfc', 'jse'),
-        param_file=Path(
-            get_package_share_directory('tiago_lfc'),
-            'config',
-            'lfc_parameters.yaml',
         ),
-        activate=False,
-        controller_manager='/controller_manager',
+        load_controllers(
+            controllers=('lfc', 'jse'),
+            param_file=Path(
+                get_package_share_directory('tiago_lfc'),
+                'config',
+                'lfc_parameters.yaml',
+            ),
+            activate=False,
+            controller_manager='/controller_manager',
+        )
     )
 
     return LaunchDescription(
-        chain(
-            (
-                # Since we are simulating, use_sim_time is FORCED here
-                SetLaunchConfiguration(
-                    'use_sim_time',
-                    'True',
-                ),
-            ),
-            xacro_args,
-            spawn_robot_state_publisher,
-            start_gz,
-            load_lfc_jse,
-        )
+        chain(start_gz, spawn_tiago)
     )
