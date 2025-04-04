@@ -203,7 +203,7 @@ def __make_switch_controllers_cmd(
     logger.info(
         '{} controllers: {}...'.format(
             'Activating' if activate else 'Deactivating',
-            ' '.join(cmd[3:])
+            ' '.join(cmd[4:])
         )
     )
 
