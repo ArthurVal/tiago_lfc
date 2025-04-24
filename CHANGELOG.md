@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `CHANGELOG.md`: Markdown indentation issues
+- `lfc.repos`: Updates the branches names based on v2.0 of LFC (no more jazzy branch)
 
 ## [1.0.1] - 2025-04-04
 
