@@ -2,6 +2,16 @@
 lfc:
   ros__parameters:
     type: linear_feedback_controller/LinearFeedbackController
+    chainable_controller:
+      reference_prefix: ''
+      command_interfaces:
+        - arm_1_joint/effort
+        - arm_2_joint/effort
+        - arm_3_joint/effort
+        - arm_4_joint/effort
+        - arm_5_joint/effort
+        - arm_6_joint/effort
+        - arm_7_joint/effort
     remove_gravity_compensation_effort: true
     joint_velocity_filter_coefficient: 0.9
     moving_joint_names:
@@ -39,26 +49,47 @@ lfc:
 jse:
   ros__parameters:
     type: linear_feedback_controller/JointStateEstimator
-    interfaces:
-    - arm_1_joint/effort
-    - arm_1_joint/position
-    - arm_1_joint/velocity
-    - arm_2_joint/effort
-    - arm_2_joint/position
-    - arm_2_joint/velocity
-    - arm_3_joint/effort
-    - arm_3_joint/position
-    - arm_3_joint/velocity
-    - arm_4_joint/effort
-    - arm_4_joint/position
-    - arm_4_joint/velocity
-    - arm_5_joint/effort
-    - arm_5_joint/position
-    - arm_5_joint/velocity
-    - arm_6_joint/effort
-    - arm_6_joint/position
-    - arm_6_joint/velocity
-    - arm_7_joint/effort
-    - arm_7_joint/position
-    - arm_7_joint/velocity
-    command_prefix: lfc
+    state_interfaces:
+      - arm_1_joint/effort
+      - arm_1_joint/position
+      - arm_1_joint/velocity
+      - arm_2_joint/effort
+      - arm_2_joint/position
+      - arm_2_joint/velocity
+      - arm_3_joint/effort
+      - arm_3_joint/position
+      - arm_3_joint/velocity
+      - arm_4_joint/effort
+      - arm_4_joint/position
+      - arm_4_joint/velocity
+      - arm_5_joint/effort
+      - arm_5_joint/position
+      - arm_5_joint/velocity
+      - arm_6_joint/effort
+      - arm_6_joint/position
+      - arm_6_joint/velocity
+      - arm_7_joint/effort
+      - arm_7_joint/position
+      - arm_7_joint/velocity
+    command_interfaces:
+      - lfc/arm_1_joint/effort
+      - lfc/arm_1_joint/position
+      - lfc/arm_1_joint/velocity
+      - lfc/arm_2_joint/effort
+      - lfc/arm_2_joint/position
+      - lfc/arm_2_joint/velocity
+      - lfc/arm_3_joint/effort
+      - lfc/arm_3_joint/position
+      - lfc/arm_3_joint/velocity
+      - lfc/arm_4_joint/effort
+      - lfc/arm_4_joint/position
+      - lfc/arm_4_joint/velocity
+      - lfc/arm_5_joint/effort
+      - lfc/arm_5_joint/position
+      - lfc/arm_5_joint/velocity
+      - lfc/arm_6_joint/effort
+      - lfc/arm_6_joint/position
+      - lfc/arm_6_joint/velocity
+      - lfc/arm_7_joint/effort
+      - lfc/arm_7_joint/position
+      - lfc/arm_7_joint/velocity

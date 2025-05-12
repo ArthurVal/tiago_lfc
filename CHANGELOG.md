@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `lfc_parameters.yaml`: Match with the new parameters of  LFC v2.0.0
+
 ## [1.0.2] - 2025-04-24
 
 ### Fixed
