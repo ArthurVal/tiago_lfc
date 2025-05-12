@@ -21,17 +21,18 @@ from launch.substitutions import (
 )
 
 from tiago_lfc.launch import (
+    GzWorld,
     Invoke,
     add_robot_description_from_xacro,
     all_arguments_from_yaml,
     evaluate_dict,
+    gz_control,
     gz_server,
     gz_spawn_entity,
     load_controllers,
     run_robot_state_publisher,
     # switch_controllers,
 )
-
 
 def generate_launch_description():
     """Launch tiago within GZ."""
@@ -72,6 +73,12 @@ def generate_launch_description():
     #   'sdf_filename' in gz service /world/create (EntityFactory msg) ?
     # - ... ?
 
+    # Remove the file extension from world defined by gz_server()
+    world = Invoke(
+        lambda v: Path(v).stem,
+        LaunchConfiguration('world'),
+    )
+
     spawn_tiago = chain(
         xacro_args,
         add_robot_description_from_xacro(
@@ -93,11 +100,7 @@ def generate_launch_description():
         gz_spawn_entity(
             model_path=urdf_file,
             name='tiago',
-            world=Invoke(
-                # Remove the file extension from world defined by gz_server()
-                lambda v: Path(v).stem,
-                LaunchConfiguration('world'),
-            ),
+            world=world,
             timeout_ms=1000,
         ),
         load_controllers(
@@ -109,9 +112,21 @@ def generate_launch_description():
             ),
             activate=False,
             controller_manager='/controller_manager',
-        )
+        ),
+
     )
 
     return LaunchDescription(
-        chain(start_gz, spawn_tiago)
+        chain(
+            start_gz,
+            spawn_tiago,
+            gz_control(
+                world=world,
+                step=GzWorld.Play(),
+                timeout_ms=1000,
+
+                # This disable the DeclareArgument('reset', ...)
+                reset=Invoke(lambda *args: None),
+            )
+        )
     )
