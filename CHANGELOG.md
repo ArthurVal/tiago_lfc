@@ -7,14 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- `lfc_parameters.yaml`: Match with the new parameters of  LFC v2.0.0
-
 ### Added
 
 - `gz_control()`/`gz_control.launch.py`: New launch file use to control the sim
   (start/pause/...) by cmd line
+
+### Changed
+
+- `gz_tiago_lfc.launch.py`: Now automatically starts the sim after spawning the
+  model
+
+### Fixed
+
+- `lfc_parameters.yaml`: Match with the new parameters of  LFC v2.0.0
+
 
 ## [1.0.2] - 2025-04-24
 
