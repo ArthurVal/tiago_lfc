@@ -361,15 +361,15 @@ class GzWorld:
             else:
                 return 'step: true'
 
-    class Start():
-        """Start the sim."""
+    class Play():
+        """Play the sim."""
 
         def __repr__(self):
-            """Repr of Start."""
-            return 'Starting sim'
+            """Repr of Play."""
+            return 'Playing sim'
 
         def make_request(self):
-            """Create the gz service req to start."""
+            """Create the gz service req to play."""
             return 'pause: false'
 
     class Pause():
@@ -393,7 +393,7 @@ class GzWorld:
 
 def __make_world_control_cmd(
         world: Text,
-        step: Optional[Union[GzWorld.Start, GzWorld.Pause, GzWorld.Step]],
+        step: Optional[Union[GzWorld.Play, GzWorld.Pause, GzWorld.Step]],
         reset: Optional[GzWorld.Reset],
         seed: Optional[int],
         timeout_ms: int,
@@ -452,7 +452,7 @@ def __make_world_control_cmd(
 def gz_control(
         *,
         world: Optional[SubstitutionOr[Text]] = None,
-        step: Optional[SubstitutionOr[Union[GzWorld.Start, GzWorld.Pause, GzWorld.Step]]] = None,
+        step: Optional[SubstitutionOr[Union[GzWorld.Play, GzWorld.Pause, GzWorld.Step]]] = None,
         reset: Optional[SubstitutionOr[GzWorld.Reset]] = None,
         seed: Optional[SubstitutionOr[int]] = None,
         timeout_ms: Optional[SubstitutionOr[int]] = None,
@@ -464,8 +464,8 @@ def gz_control(
     world: Optional[SubstitutionOr[Path]]
       If not None, the GZ world we wish to spawn our model into.
       When None, declare a LaunchArgument for it (default to 'empty').
-    step: Optional[SubstitutionOr[Union[GzWorld.Start, GzWorld.Pause, GzWorld.Step]]]
-      Either Start/Stop or a Step value.
+    step: Optional[SubstitutionOr[Union[GzWorld.Play, GzWorld.Pause, GzWorld.Step]]]
+      Either Play/Pause or a step value.
       When None, declare a LaunchArgument for it (default to '' - unset).
     reset: Optional[SubstitutionOr[GzWorld.Reset]]
       If not None, set to one of the GzWorld.Reset flag (Time, Model or All).
@@ -496,7 +496,7 @@ def gz_control(
         yield DeclareLaunchArgument(
             'step',
             description=(
-                'Either "Start", "Pause" or an int value (>= 0) corresponding '
+                'Either "Play", "Pause" or an int value (>= 0) corresponding '
                 'to the number of steps we wish to do'
             ),
             default_value='',
@@ -504,7 +504,7 @@ def gz_control(
         step = Invoke(
             lambda txt:
             None if txt == ''
-            else GzWorld.Start() if txt == 'Start'
+            else GzWorld.Play() if txt == 'Play'
             else GzWorld.Pause() if txt == 'Pause'
             else GzWorld.Step(int(txt)),
             LaunchConfiguration('step'),
@@ -525,7 +525,7 @@ def gz_control(
     if seed is None:
         yield DeclareLaunchArgument(
             'seed',
-            description='The random seed used by the model. (MUST BE >= 0)',
+            description='The random seed used by the sim. (MUST BE >= 0)',
             default_value='',
         )
         seed = Invoke(
