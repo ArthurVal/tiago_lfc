@@ -15,6 +15,7 @@ from pathlib import (
 from typing import (
     Optional,
     Text,
+    Union,
 )
 
 from launch import (
@@ -333,26 +334,74 @@ def gz_spawn_entity(
     )
 
 
-class WorldReset(Flag):
-    """Todo."""
+class GzWorld:
+    """Namespace for gz_control related args values."""
 
-    Time = auto()
-    Model = auto()
-    All = Time | Model
+    class Step():
+        """Indicates the number of Steps done by the sim."""
+
+        def __repr__(self):
+            """Repr of the Step."""
+            return 'Stepping {} times'.format(self.__value)
+
+        def __init__(self, v):
+            """Create a Step with a given value (>= 0)."""
+            if not isinstance(v, int) or (v < 0):
+                raise AttributeError(
+                    'Step must be initialize with an uint (> 0)'
+                    ' (got type "{}" = {})'.format(type(v), v)
+                )
+
+            self.__value = v
+
+        def make_request(self):
+            """Create the gz service req to step."""
+            if self.__value > 1:
+                return 'multi_step: {}'.format(self.__value)
+            else:
+                return 'step: true'
+
+    class Start():
+        """Start the sim."""
+
+        def __repr__(self):
+            """Repr of Start."""
+            return 'Starting sim'
+
+        def make_request(self):
+            """Create the gz service req to start."""
+            return 'pause: false'
+
+    class Pause():
+        """Pause the sim."""
+
+        def __repr__(self):
+            """Repr of Pause."""
+            return 'Pausing sim'
+
+        def make_request(self):
+            """Create the gz service req to pause."""
+            return 'pause: true'
+
+    class Reset(Flag):
+        """Enum use to select the reset type."""
+
+        Time = auto()
+        Model = auto()
+        All = Time | Model
 
 
 def __make_world_control_cmd(
         world: Text,
-        start: Optional[bool],
-        step: Optional[int],
-        reset: Optional[WorldReset],
+        step: Optional[Union[GzWorld.Start, GzWorld.Pause, GzWorld.Step]],
+        reset: Optional[GzWorld.Reset],
         seed: Optional[int],
         timeout_ms: int,
 ) -> Text:
-    if all(arg is None for arg in (start, step, seed, reset)):
+    if all(arg is None for arg in (step, seed, reset)):
         raise AttributeError(
             'No arguments provided to gz_control (Require at least one of'
-            ' "start", "step", "seed" and/or "reset" argument'
+            ' "step", "seed" and/or "reset" argument)'
         )
 
     msg = 'On world "{}":'.format(world)
@@ -369,28 +418,16 @@ def __make_world_control_cmd(
 
     requests = []
 
-    if start is not None:
-        msg += '\n - {}'.format('Starting sim' if start else 'Pausing sim')
-        requests.append('pause: {}'.format('false' if start else 'true'))
-
     if step is not None:
-        if step == 1:
-            msg += '\n - Stepping'
-            requests.append('step: true')
-        elif step > 1:
-            msg += '\n - Stepping {} times'.format(step)
-            requests.append('multi_step: {}'.format(step))
-        else:
-            raise AttributeError(
-                '"step" argument MUST be >= 1 (step = {})'.format(step)
-            )
+        msg += '\n - {} '.format(repr(step))
+        requests.append(step.make_request())
 
     if reset is not None:
         msg += '\n - Reseting ({})'.format(reset)
         requests.append(
             'reset: {{{}: true}}'.format(
-                'model_only' if reset == WorldReset.Model
-                else 'time_only' if reset == WorldReset.Time
+                'model_only' if reset == GzWorld.Reset.Model
+                else 'time_only' if reset == GzWorld.Reset.Time
                 else 'all'
             )
         )
@@ -415,9 +452,8 @@ def __make_world_control_cmd(
 def gz_control(
         *,
         world: Optional[SubstitutionOr[Text]] = None,
-        start: Optional[SubstitutionOr[bool]] = None,
-        step: Optional[SubstitutionOr[int]] = None,
-        reset: Optional[SubstitutionOr[WorldReset]] = None,
+        step: Optional[SubstitutionOr[Union[GzWorld.Start, GzWorld.Pause, GzWorld.Step]]] = None,
+        reset: Optional[SubstitutionOr[GzWorld.Reset]] = None,
         seed: Optional[SubstitutionOr[int]] = None,
         timeout_ms: Optional[SubstitutionOr[int]] = None,
 ) -> Generator[Action]:
@@ -428,14 +464,11 @@ def gz_control(
     world: Optional[SubstitutionOr[Path]]
       If not None, the GZ world we wish to spawn our model into.
       When None, declare a LaunchArgument for it (default to 'empty').
-    start: Optional[SubstitutionOr[bool]]
-      If not None, set to true if you wish to start the sim, false to pause.
+    step: Optional[SubstitutionOr[Union[GzWorld.Start, GzWorld.Pause, GzWorld.Step]]]
+      Either Start/Stop or a Step value.
       When None, declare a LaunchArgument for it (default to '' - unset).
-    step: Optional[SubstitutionOr[uint]]
-      If not None, set to the number of steps you wish to do.
-      When None, declare a LaunchArgument for it (default to '' - unset).
-    reset: Optional[SubstitutionOr[WorldReset]]
-      If not None, set to one of the WorldReset flag (Time, Model or All).
+    reset: Optional[SubstitutionOr[GzWorld.Reset]]
+      If not None, set to one of the GzWorld.Reset flag (Time, Model or All).
       When None, declare a LaunchArgument for it (default to '' - unset).
     seed: Optional[SubstitutionOr[uint]]
       If not None, set the random seed used by the world.
@@ -459,29 +492,21 @@ def gz_control(
         )
         world = LaunchConfiguration('world')
 
-    if start is None:
-        yield DeclareLaunchArgument(
-            'start',
-            description=(
-                'Set to "True" if you wish to start the sim. "False" to pause'
-                ' it.'
-            ),
-            default_value='',
-            choices=['False', 'True', ''],
-        )
-        start = Invoke(
-            __bool_from_string,
-            LaunchConfiguration('start'),
-        )
-
     if step is None:
         yield DeclareLaunchArgument(
             'step',
-            description='Set to a number of steps to jump to (MUST BE >= 1)',
+            description=(
+                'Either "Start", "Pause" or an int value (>= 0) corresponding '
+                'to the number of steps we wish to do'
+            ),
             default_value='',
         )
         step = Invoke(
-            lambda t: None if t == '' else int(t),
+            lambda txt:
+            None if txt == ''
+            else GzWorld.Start() if txt == 'Start'
+            else GzWorld.Pause() if txt == 'Pause'
+            else GzWorld.Step(int(txt)),
             LaunchConfiguration('step'),
         )
 
@@ -493,7 +518,7 @@ def gz_control(
             default_value='',
         )
         reset = Invoke(
-            lambda t: None if t == '' else WorldReset[t],
+            lambda txt: None if txt == '' else GzWorld.Reset[txt],
             LaunchConfiguration('reset'),
         )
 
@@ -522,7 +547,6 @@ def gz_control(
     yield Invoke(
         __make_world_control_cmd,
         world=world,
-        start=start,
         step=step,
         reset=reset,
         seed=seed,
