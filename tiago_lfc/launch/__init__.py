@@ -6,6 +6,7 @@ from .arguments import (
     all_arguments_from_yaml,
 )
 from .gz import (
+    GzWorld,
     gz_control,
     gz_server,
     gz_spawn_entity,
@@ -42,9 +43,10 @@ __all__ = [
     'all_arguments_from_yaml',
 
     # gz
+    'GzWorld',
+    'gz_control',
     'gz_server',
     'gz_spawn_entity',
-    'gz_control',
 
     # invoke
     'FunctionSubstitution',
