@@ -1,0 +1,85 @@
+diff --git c/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py i/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py
+index f7ed4bc..12a77d8 100644
+--- c/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py
++++ i/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py
+@@ -3,7 +3,6 @@ import crocoddyl
+ import numpy as np
+ import numpy.typing as npt
+ import pinocchio
+-import colmpc
+ import dataclasses
+ import yaml
+ import pinocchio as pin
+@@ -88,14 +87,14 @@ class ActivationModelWeightedQuad(ActivationModel):
+         return crocoddyl.ActivationModelWeightedQuad(weights)
+ 
+ 
+-@dataclasses.dataclass
+-class ActivationModelQuadExp(ActivationModel):
+-    class_: T.ClassVar[str] = "ActivationModelQuadExp"
+-    alpha: float = 1.0
++# @dataclasses.dataclass
++# class ActivationModelQuadExp(ActivationModel):
++#     class_: T.ClassVar[str] = "ActivationModelQuadExp"
++#     alpha: float = 1.0
+ 
+-    def build(self, data: BuildData, residual: crocoddyl.CostModelResidual):
+-        # float() is required to allow parsing a float in scientific notation.
+-        return colmpc.ActivationModelQuadExp(residual.nr, float(self.alpha))
++#     def build(self, data: BuildData, residual: crocoddyl.CostModelResidual):
++#         # float() is required to allow parsing a float in scientific notation.
++#         return colmpc.ActivationModelQuadExp(residual.nr, float(self.alpha))
+ 
+ 
+ @dataclasses.dataclass
+@@ -167,28 +166,28 @@ class ResidualModelFramePlacement(ResidualModel):
+         return crocoddyl.ResidualModelFramePlacement(data.state, id, pref)
+ 
+ 
+-@dataclasses.dataclass
+-class ResidualDistanceCollision(ResidualModel):
+-    class_: T.ClassVar[str] = "ResidualDistanceCollision"
+-    collision_pair: T.Tuple[str, str]
+-
+-    def build(self, data: BuildData):
+-        assert len(self.collision_pair) == 2
+-        cmodel = data.collision_model
+-        # Check that the collision pair exist in the collision model
+-        # and find its index in the list of collision pairs.
+-        cp = []
+-        for name in self.collision_pair:
+-            assert cmodel.existGeometryName(name), f"Geometry object {name} not found."
+-            cp.append(cmodel.getGeometryId(name))
+-        cp = pinocchio.CollisionPair(*cp)
+-        assert cmodel.existCollisionPair(cp)
+-        id = cmodel.findCollisionPair(cp)
+-        assert id < len(data.collision_model.collisionPairs)
+-        # Build the residual
+-        return colmpc.ResidualDistanceCollision(
+-            data.state, data.actuation.nu, cmodel, id
+-        )
++# @dataclasses.dataclass
++# class ResidualDistanceCollision(ResidualModel):
++#     class_: T.ClassVar[str] = "ResidualDistanceCollision"
++#     collision_pair: T.Tuple[str, str]
++
++#     def build(self, data: BuildData):
++#         assert len(self.collision_pair) == 2
++#         cmodel = data.collision_model
++#         # Check that the collision pair exist in the collision model
++#         # and find its index in the list of collision pairs.
++#         cp = []
++#         for name in self.collision_pair:
++#             assert cmodel.existGeometryName(name), f"Geometry object {name} not found."
++#             cp.append(cmodel.getGeometryId(name))
++#         cp = pinocchio.CollisionPair(*cp)
++#         assert cmodel.existCollisionPair(cp)
++#         id = cmodel.findCollisionPair(cp)
++#         assert id < len(data.collision_model.collisionPairs)
++#         # Build the residual
++#         return colmpc.ResidualDistanceCollision(
++#             data.state, data.actuation.nu, cmodel, id
++#         )
+ 
+ 
+ @dataclasses.dataclass

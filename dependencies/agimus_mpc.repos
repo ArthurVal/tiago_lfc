@@ -1,0 +1,17 @@
+repositories:
+  coal:
+    type: git
+    url: https://github.com/coal-library/coal
+    version: v3.0.1
+  mim_solvers:
+    type: git
+    url: https://github.com/machines-in-motion/mim_solvers
+    version: v0.1.0
+  agimus_msgs:
+    type: git
+    url: https://github.com/agimus-project/agimus_msgs
+    version: humble-devel
+  agimus_controller:
+    type: git
+    url: https://github.com/agimus-project/agimus_controller.git
+    version: humble-devel
