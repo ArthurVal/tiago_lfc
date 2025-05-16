@@ -1,7 +1,7 @@
-diff --git i/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py w/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py
+diff --git c/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py i/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py
 index f7ed4bc..12a77d8 100644
---- i/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py
-+++ w/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py
+--- c/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py
++++ i/agimus_controller/agimus_controller/ocp/ocp_croco_generic.py
 @@ -3,7 +3,6 @@ import crocoddyl
  import numpy as np
  import numpy.typing as npt
@@ -83,29 +83,3 @@ index f7ed4bc..12a77d8 100644
  
  
  @dataclasses.dataclass
-diff --git i/agimus_controller_ros/agimus_controller_ros/agimus_controller.py w/agimus_controller_ros/agimus_controller_ros/agimus_controller.py
-index 96c9dd5..b75405d 100644
---- i/agimus_controller_ros/agimus_controller_ros/agimus_controller.py
-+++ w/agimus_controller_ros/agimus_controller_ros/agimus_controller.py
-@@ -75,7 +75,7 @@ class RobotModelsMixin:
- 
-         # Get moving joint names from LFC
-         self.moving_joint_names = get_param_from_node(
--            self, "linear_feedback_controller", "moving_joint_names"
-+            self, "lfc", "moving_joint_names"
-         ).string_array_value
- 
-         self.subscriber_robot_description = self.create_subscription(
-diff --git i/agimus_controller_ros/agimus_controller_ros/simple_trajectory_publisher.py w/agimus_controller_ros/agimus_controller_ros/simple_trajectory_publisher.py
-index f3152d7..c4754e9 100644
---- i/agimus_controller_ros/agimus_controller_ros/simple_trajectory_publisher.py
-+++ w/agimus_controller_ros/agimus_controller_ros/simple_trajectory_publisher.py
-@@ -71,7 +71,7 @@ class SimpleTrajectoryPublisher(Node):
-         # ros2 topic info -v /robot_description
-         # ros2 topic info -v /sensor
-         self.moving_joint_names = self.get_param_from_node(
--            "linear_feedback_controller", "moving_joint_names"
-+            "lfc", "moving_joint_names"
-         ).string_array_value
-         self.subscriber_robot_description_ = self.create_subscription(
-             String,
